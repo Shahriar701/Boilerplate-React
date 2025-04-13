@@ -1,50 +1,47 @@
 import { injectable } from 'inversify';
-import { IStorageAdapter } from '../../infrastructure/storage/storage.interface';
+import { IStorageService } from './storage.interface';
 
 @injectable()
-export class LocalStorageAdapter implements IStorageAdapter {
-  get<T = any>(key: string): T | null {
+export class LocalStorageAdapter implements IStorageService {
+  private readonly prefix = 'app_';
+
+  get(key: string): string | null {
     try {
-      const value = localStorage.getItem(key);
-      if (!value) return null;
-      return JSON.parse(value) as T;
+      return localStorage.getItem(this.getKeyWithPrefix(key));
     } catch (error) {
-      console.error(`Error retrieving ${key} from localStorage:`, error);
+      console.error(`Error getting item from localStorage: ${key}`, error);
       return null;
     }
   }
 
-  set(key: string, value: any): void {
+  set(key: string, value: string): void {
     try {
-      const stringValue = JSON.stringify(value);
-      localStorage.setItem(key, stringValue);
+      localStorage.setItem(this.getKeyWithPrefix(key), value);
     } catch (error) {
-      console.error(`Error setting ${key} in localStorage:`, error);
+      console.error(`Error setting item in localStorage: ${key}`, error);
     }
   }
 
   remove(key: string): void {
     try {
-      localStorage.removeItem(key);
+      localStorage.removeItem(this.getKeyWithPrefix(key));
     } catch (error) {
-      console.error(`Error removing ${key} from localStorage:`, error);
+      console.error(`Error removing item from localStorage: ${key}`, error);
     }
   }
 
   clear(): void {
     try {
-      localStorage.clear();
+      // Only clear items with our prefix
+      Object.keys(localStorage)
+        .filter(key => key.startsWith(this.prefix))
+        .forEach(key => localStorage.removeItem(key));
     } catch (error) {
-      console.error('Error clearing localStorage:', error);
+      console.error('Error clearing localStorage', error);
     }
   }
 
-  has(key: string): boolean {
-    try {
-      return localStorage.getItem(key) !== null;
-    } catch (error) {
-      console.error(`Error checking if ${key} exists in localStorage:`, error);
-      return false;
-    }
+  private getKeyWithPrefix(key: string): string {
+    return `${this.prefix}${key}`;
   }
 } 

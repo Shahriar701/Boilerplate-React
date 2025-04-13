@@ -4,6 +4,7 @@ import { Provider as ReduxProvider } from 'react-redux';
 import AppRoutes from './routes/AppRoutes';
 import { container } from './app/config/inversify.config';
 import GlobalErrorBoundary from './errorBoundaries/GlobalErrorBoundary';
+import Navigation from './shared/components/Navigation';
 import './App.css';
 
 // This will be created later
@@ -11,9 +12,9 @@ import './App.css';
 
 // For now, we'll just use a temporary store to avoid errors
 const tempStore = {
-  dispatch: () => {},
+  dispatch: () => { },
   getState: () => ({}),
-  subscribe: () => () => {},
+  subscribe: () => () => { },
 };
 
 const App = () => {
@@ -22,8 +23,11 @@ const App = () => {
       <InversifyProvider container={container}>
         <ReduxProvider store={tempStore as any}>
           <Router>
-            <div className="app-container">
-              <AppRoutes />
+            <div className="app-wrapper">
+              <Navigation />
+              <main className="app-container" role="main">
+                <AppRoutes />
+              </main>
             </div>
           </Router>
         </ReduxProvider>

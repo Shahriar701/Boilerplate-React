@@ -1,26 +1,38 @@
-export interface LoginDTO {
+export interface LoginRequest {
   email: string;
   password: string;
-  rememberMe?: boolean;
 }
 
-export interface RegisterDTO {
+export interface RegisterRequest {
   email: string;
   password: string;
-  username: string;
-  firstName?: string;
-  lastName?: string;
+  name: string;
 }
 
+export interface UserDto {
+  id: string;
+  email: string;
+  name: string;
+  roles: string[];
+}
+
+export interface LoginResponse {
+  user: UserDto;
+  token: string;
+}
+
+export interface RegisterResponse {
+  user: UserDto;
+  token: string;
+}
+
+// This matches the backend response format
 export interface AuthResponseDTO {
-  accessToken: string;
-  refreshToken: string;
-  expiresIn: number;
-  tokenType: string;
+  token: string;
   user: {
     id: string;
+    name: string;
     email: string;
-    username: string;
-    roles: Array<{ id: string; name: string }>;
+    roles?: string[];
   };
 } 

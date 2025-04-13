@@ -18,4 +18,11 @@ export interface ILogger {
   warn(message: string, context?: Record<string, any>): void;
   error(message: string, error?: Error, context?: Record<string, any>): void;
   log(level: LogLevel, message: string, context?: Record<string, any>): void;
+}
+
+export interface ILoggerService {
+  info(message: string, ...args: any[]): void;
+  error(message: string, error?: Error | unknown): void;
+  warn(message: string, ...args: any[]): void;
+  debug(message: string, ...args: any[]): void;
 } 

@@ -1,16 +1,17 @@
-import { inject, injectable } from 'inversify';
+import { injectable, inject } from 'inversify';
 import { TYPES } from '../../../../app/config/types';
-import { IAuthService } from '../../services/interfaces/auth-service.interface';
-import { RegisterCredentials, AuthResponse } from '../../repositories/interfaces/auth-repository.interface';
-import { IRegisterUseCase } from '../interfaces/register.usecase.interface';
+import { IRegisterUseCase } from '../register.usecase.interface';
+import { IAuthService } from '../../services/auth.service.interface';
+import { RegisterRequest, RegisterResponse } from '../../models/auth.dto';
 
 @injectable()
 export class RegisterUseCase implements IRegisterUseCase {
     constructor(
-        @inject(TYPES.IAuthService) private authService: IAuthService
+        @inject(TYPES.AuthService)
+        private readonly authService: IAuthService
     ) { }
 
-    async execute(credentials: RegisterCredentials): Promise<AuthResponse> {
-        return this.authService.register(credentials);
+    async execute(request: RegisterRequest): Promise<RegisterResponse | null> {
+        return this.authService.register(request);
     }
 } 

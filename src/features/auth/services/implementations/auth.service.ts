@@ -1,61 +1,94 @@
-import { inject, injectable } from 'inversify';
+import { injectable, inject } from 'inversify';
 import { TYPES } from '../../../../app/config/types';
-import { IStorageAdapter } from '../../../../infrastructure/storage/storage.interface';
-import { ILogger } from '../../../../infrastructure/logging/logger.interface';
-import { IAuthRepository, LoginCredentials, RegisterCredentials, AuthResponse } from '../../repositories/interfaces/auth-repository.interface';
-import { IAuthService } from '../interfaces/auth-service.interface';
+import { IAuthService } from '../auth.service.interface';
+import { IAuthRepository } from '../../repositories/auth.repository.interface';
+import { IStorageService } from '../../../../adapters/storage/storage.interface';
+import { ILoggerService } from '../../../../infrastructure/logging/logger.interface';
+import { 
+  LoginRequest, 
+  LoginResponse, 
+  RegisterRequest, 
+  RegisterResponse,
+  UserDto 
+} from '../../models/auth.dto';
 
 @injectable()
 export class AuthService implements IAuthService {
-    private readonly AUTH_TOKEN_KEY = 'authToken';
-    private readonly USER_KEY = 'user';
+  constructor(
+    @inject(TYPES.AuthRepository) private readonly authRepository: IAuthRepository,
+    @inject(TYPES.StorageService) private readonly storage: IStorageService,
+    @inject(TYPES.LoggerService) private readonly logger: ILoggerService
+  ) {}
 
-    constructor(
-        @inject(TYPES.IAuthRepository) private authRepository: IAuthRepository,
-        @inject(TYPES.IStorageAdapter) private storage: IStorageAdapter,
-        @inject(TYPES.ILogger) private logger: ILogger
-    ) { }
-
-    async login(credentials: LoginCredentials): Promise<AuthResponse> {
-        try {
-            const response = await this.authRepository.login(credentials);
-            this.storage.set(this.AUTH_TOKEN_KEY, response.token);
-            this.storage.set(this.USER_KEY, JSON.stringify(response.user));
-            return response;
-        } catch (error) {
-            this.logger.error('Login failed:', error as Error);
-            throw error;
-        }
+  async login(request: LoginRequest): Promise<LoginResponse | null> {
+    try {
+      const response = await this.authRepository.login(request);
+      
+      if (response) {
+        this.storage.set('token', response.token);
+        this.storage.set('user', JSON.stringify(response.user));
+        this.logger.info('User logged in successfully');
+      }
+      
+      return response;
+    } catch (error) {
+      this.logger.error('Error during login', error);
+      return null;
     }
+  }
 
-    async register(credentials: RegisterCredentials): Promise<AuthResponse> {
-        try {
-            const response = await this.authRepository.register(credentials);
-            this.storage.set(this.AUTH_TOKEN_KEY, response.token);
-            this.storage.set(this.USER_KEY, JSON.stringify(response.user));
-            return response;
-        } catch (error) {
-            this.logger.error('Registration failed:', error as Error);
-            throw error;
-        }
+  async register(request: RegisterRequest): Promise<RegisterResponse | null> {
+    try {
+      const response = await this.authRepository.register(request);
+      
+      if (response) {
+        this.storage.set('token', response.token);
+        this.storage.set('user', JSON.stringify(response.user));
+        this.logger.info('User registered successfully');
+      }
+      
+      return response;
+    } catch (error) {
+      this.logger.error('Error during registration', error);
+      return null;
     }
+  }
 
-    async logout(): Promise<void> {
-        try {
-            await this.authRepository.logout();
-            this.storage.remove(this.AUTH_TOKEN_KEY);
-            this.storage.remove(this.USER_KEY);
-        } catch (error) {
-            this.logger.error('Logout failed:', error as Error);
-            throw error;
-        }
+  async logout(): Promise<boolean> {
+    try {
+      const success = await this.authRepository.logout();
+      
+      if (success) {
+        this.storage.remove('token');
+        this.storage.remove('user');
+        this.logger.info('User logged out successfully');
+      }
+      
+      return success;
+    } catch (error) {
+      this.logger.error('Error during logout', error);
+      return false;
     }
+  }
 
-    isAuthenticated(): boolean {
-        return !!this.getAuthToken();
+  getCurrentUser(): UserDto | null {
+    try {
+      const userJson = this.storage.get('user');
+      if (!userJson) return null;
+      
+      return JSON.parse(userJson) as UserDto;
+    } catch (error) {
+      this.logger.error('Error getting current user', error);
+      return null;
     }
+  }
 
-    getAuthToken(): string | null {
-        return this.storage.get(this.AUTH_TOKEN_KEY);
+  isAuthenticated(): boolean {
+    try {
+      return !!this.storage.get('token');
+    } catch (error) {
+      this.logger.error('Error checking authentication status', error);
+      return false;
     }
+  }
 } 
