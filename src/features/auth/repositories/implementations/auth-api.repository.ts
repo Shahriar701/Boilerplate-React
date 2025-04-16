@@ -22,8 +22,8 @@ export class AuthApiRepository implements IAuthRepository {
         try {
             this.logger.info('Attempting login', { email: request.email });
 
-            // Use the debug-login endpoint instead of regular login
-            const response = await this.httpClient.post<AuthResponseDTO>('/auth/debug-login', request);
+            // Using the standard login endpoint
+            const response = await this.httpClient.post<AuthResponseDTO>('auth/login', request);
 
             // Transform backend response to our frontend DTO
             const loginResponse: LoginResponse = {
@@ -64,7 +64,7 @@ export class AuthApiRepository implements IAuthRepository {
     async register(request: RegisterRequest): Promise<RegisterResponse | null> {
         try {
             this.logger.info('Attempting registration', { email: request.email });
-            const response = await this.httpClient.post<AuthResponseDTO>('/auth/register', request);
+            const response = await this.httpClient.post<AuthResponseDTO>('auth/register', request);
 
             // Transform backend response to our frontend DTO
             const registerResponse: RegisterResponse = {

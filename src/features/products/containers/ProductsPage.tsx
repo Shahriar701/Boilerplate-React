@@ -3,82 +3,79 @@ import { useInjection } from 'inversify-react';
 import { TYPES } from '../../../app/config/types';
 import { IProductService } from '../services/product.service.interface';
 import { IAuthService } from '../../../features/auth/services/auth.service.interface';
-import { ProductDto, ProductFilterRequest, ProductListResponse } from '../models/product.dto';
+import { ProductDto, ProductFilterRequest } from '../models/product.dto';
 import ProductList from '../components/ProductList';
+import { useAppDispatch, useAppSelector } from '../../../store/store.config';
+import { 
+    fetchProducts, 
+    setFilters, 
+    updateProduct, 
+    deleteProduct, 
+    createProduct as createProductAction,
+    selectProductsList,
+    selectProductsLoading,
+    selectProductsError,
+    selectProductsPagination,
+    selectProductsFilters
+} from '../../../store/slices/product.slice';
+import { useProductSelection } from '../../../store/hooks/useProductSelection';
 
 const ProductsPage: React.FC = () => {
+    const dispatch = useAppDispatch();
     const productService = useInjection<IProductService>(TYPES.ProductService);
     const authService = useInjection<IAuthService>(TYPES.AuthService);
-
-    const [products, setProducts] = useState<ProductDto[]>([]);
-    const [selectedIds, setSelectedIds] = useState<string[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-    const [isAdmin, setIsAdmin] = useState(false);
-    const [filters, setFilters] = useState<ProductFilterRequest>({
-        page: 1,
-        pageSize: 10
-    });
-    const [pagination, setPagination] = useState({
+    
+    // Get product state from Redux using selectors with default values to prevent undefined errors
+    const products = useAppSelector(selectProductsList) || [];
+    const isLoading = useAppSelector(selectProductsLoading) || false;
+    const error = useAppSelector(selectProductsError) || null;
+    const pagination = useAppSelector(selectProductsPagination) || {
         total: 0,
         page: 1,
         pageSize: 10,
         totalPages: 1
-    });
+    };
+    const filters = useAppSelector(selectProductsFilters) || {
+        page: 1,
+        pageSize: 10
+    };
+    
+    // Get product selection functionality from custom hook
+    const { selectedIds, selectProduct, unselectProduct, clearSelectedProducts } = useProductSelection();
+    
+    const [isAdmin, setIsAdmin] = useState(false);
+
+    // Debug info for products
+    useEffect(() => {
+        console.log('Products length:', products?.length || 0);
+        console.log('Products data:', products);
+        console.log('Loading state:', isLoading);
+        console.log('Error state:', error);
+        console.log('Pagination:', pagination);
+    }, [products, isLoading, error, pagination]);
 
     useEffect(() => {
         // Check if user has admin role
         const currentUser = authService.getCurrentUser();
         setIsAdmin(currentUser && currentUser.roles ? currentUser.roles.includes('admin') : false);
 
-        const fetchProducts = async () => {
-            setIsLoading(true);
-            setError(null);
-
-            try {
-                const response = await productService.getProducts(filters);
-                setProducts(response?.items || []);
-                setPagination({
-                    total: response?.total || 0,
-                    page: response?.page || 1,
-                    pageSize: response?.pageSize || 10,
-                    totalPages: response?.totalPages || 1
-                });
-
-                // Load selected products from service
-                const ids = productService.getSelectedProductIds() || [];
-                setSelectedIds(ids);
-            } catch (err) {
-                if (err instanceof Error) {
-                    setError(err.message);
-                } else {
-                    setError('Failed to load products');
-                }
-                console.error('Error loading products:', err);
-                setProducts([]);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
-        fetchProducts();
-    }, [productService, authService, filters]);
+        // Fetch products on component mount and when filters change
+        if (filters) {
+            console.log('Fetching products with filters:', filters);
+            dispatch(fetchProducts(filters));
+        }
+    }, [dispatch, authService, filters]);
 
     const handleSelectProduct = (id: string) => {
-        productService.selectProduct(id);
-        const ids = productService.getSelectedProductIds() || [];
-        setSelectedIds(ids);
+        selectProduct(id);
     };
 
     const handleUnselectProduct = (id: string) => {
-        productService.unselectProduct(id);
-        const ids = productService.getSelectedProductIds() || [];
-        setSelectedIds(ids);
+        unselectProduct(id);
     };
 
     const handleClearSelected = () => {
-        productService.clearSelectedProducts();
-        setSelectedIds([]);
+        clearSelectedProducts();
     };
 
     const handleViewSelected = async () => {
@@ -86,123 +83,49 @@ const ProductsPage: React.FC = () => {
             return;
         }
 
-        setIsLoading(true);
         try {
             const selectedProducts = await productService.getSelectedProducts(selectedIds);
-            setProducts(selectedProducts || []);
-            setPagination({
-                total: selectedProducts?.length || 0,
-                page: 1,
-                pageSize: selectedProducts?.length || 0,
-                totalPages: 1
-            });
+            console.log('Selected products:', selectedProducts);
+            // We could dispatch a custom action here to set the filtered products
+            // For now, we'll just use the existing state management
         } catch (err) {
-            if (err instanceof Error) {
-                setError(err.message);
-            } else {
-                setError('Failed to load selected products');
-            }
-            setProducts([]);
-        } finally {
-            setIsLoading(false);
+            console.error('Error loading selected products:', err);
         }
     };
 
-    const handleViewAll = async () => {
-        setFilters({
+    const handleViewAll = () => {
+        dispatch(setFilters({
             page: 1,
             pageSize: 10
-        });
+        }));
     };
 
     // Admin functionality
     const handleCreateProduct = async (product: Omit<ProductDto, 'id'>) => {
         if (!isAdmin) {
-            setError('Only admins can create products');
+            console.error('Only admins can create products');
             return;
         }
 
-        setIsLoading(true);
-        try {
-            await productService.createProduct(product);
-            // Refresh product list
-            const response = await productService.getProducts(filters);
-            setProducts(response?.items || []);
-            setPagination({
-                total: response?.total || 0,
-                page: response?.page || 1,
-                pageSize: response?.pageSize || 10,
-                totalPages: response?.totalPages || 1
-            });
-        } catch (err) {
-            if (err instanceof Error) {
-                setError(err.message);
-            } else {
-                setError('Failed to create product');
-            }
-            setProducts([]);
-        } finally {
-            setIsLoading(false);
-        }
+        dispatch(createProductAction(product));
     };
 
-    const handleUpdateProduct = async (id: string, product: Partial<ProductDto>) => {
+    const handleUpdateProduct = (id: string, product: Partial<ProductDto>) => {
         if (!isAdmin) {
-            setError('Only admins can update products');
+            console.error('Only admins can update products');
             return;
         }
 
-        setIsLoading(true);
-        try {
-            await productService.updateProduct(id, product);
-            // Update the product in the current list
-            setProducts(prevProducts =>
-                prevProducts ? prevProducts.map(p => p.id === id ? { ...p, ...product } : p) : []
-            );
-        } catch (err) {
-            if (err instanceof Error) {
-                setError(err.message);
-            } else {
-                setError(`Failed to update product ${id}`);
-            }
-        } finally {
-            setIsLoading(false);
-        }
+        dispatch(updateProduct({ id, data: product }));
     };
 
-    const handleDeleteProduct = async (id: string) => {
+    const handleDeleteProduct = (id: string) => {
         if (!isAdmin) {
-            setError('Only admins can delete products');
+            console.error('Only admins can delete products');
             return;
         }
 
-        setIsLoading(true);
-        try {
-            const success = await productService.deleteProduct(id);
-            if (success) {
-                // Remove the product from the current list
-                setProducts(prevProducts =>
-                    prevProducts ? prevProducts.filter(p => p.id !== id) : []
-                );
-                // Also remove from selected IDs if it was selected
-                if (selectedIds && selectedIds.includes(id)) {
-                    productService.unselectProduct(id);
-                    setSelectedIds(prevIds =>
-                        prevIds ? prevIds.filter(selectedId => selectedId !== id) : []
-                    );
-                }
-            } else {
-                setError(`Failed to delete product ${id}`);
-            }
-        } catch (err) {
-            if (err instanceof Error) {
-                setError(err.message);
-            } else {
-                setError(`Failed to delete product ${id}`);
-            }
-        } finally {
-            setIsLoading(false);
-        }
+        dispatch(deleteProduct(id));
     };
 
     // Safely calculate the number of selected items
@@ -249,22 +172,35 @@ const ProductsPage: React.FC = () => {
                 {error && <div className="error-message">{error}</div>}
 
                 <ProductList
-                    products={products || []}
+                    products={products}
                     isLoading={isLoading}
                     selectedIds={selectedIds || []}
-                    isAdmin={isAdmin}
                     onSelectProduct={handleSelectProduct}
                     onUnselectProduct={handleUnselectProduct}
-                    onDeleteProduct={handleDeleteProduct}
-                    onUpdateProduct={handleUpdateProduct}
+                    onUpdateProduct={isAdmin ? handleUpdateProduct : undefined}
+                    onDeleteProduct={isAdmin ? handleDeleteProduct : undefined}
                 />
 
-                {!isLoading && products && products.length > 0 && (
+                {/* Pagination controls - only show if pagination exists and has more than 1 page */}
+                {pagination && pagination.totalPages > 1 && (
                     <div className="pagination">
-                        <div className="pagination-info">
-                            Showing {products.length} of {pagination.total} products
-                        </div>
-                        {/* Add pagination controls here */}
+                        <button
+                            disabled={pagination.page === 1}
+                            onClick={() => dispatch(setFilters({ ...filters, page: pagination.page - 1 }))}
+                            className="btn-outline"
+                        >
+                            Previous
+                        </button>
+                        <span className="pagination-info">
+                            Page {pagination.page} of {pagination.totalPages}
+                        </span>
+                        <button
+                            disabled={pagination.page === pagination.totalPages}
+                            onClick={() => dispatch(setFilters({ ...filters, page: pagination.page + 1 }))}
+                            className="btn-outline"
+                        >
+                            Next
+                        </button>
                     </div>
                 )}
             </div>

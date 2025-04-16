@@ -10,8 +10,8 @@ import {
 } from '../../models/auth.dto';
 
 /**
- * A mock repository that simulates successful authentication
- * This is a temporary solution to bypass the backend login issues
+ * A mock repository that simulates authentication with the backend
+ * This provides data for development and testing without requiring a backend
  */
 @injectable()
 export class AuthMockRepository implements IAuthRepository {
@@ -21,6 +21,16 @@ export class AuthMockRepository implements IAuthRepository {
         @inject(TYPES.LoggerService) private readonly logger: ILoggerService
     ) {
         // Pre-populate with test users
+        this.users['demo@example.com'] = {
+            password: 'password123',
+            userData: {
+                id: 'demo-user-id-123',
+                name: 'Demo User',
+                email: 'demo@example.com',
+                roles: ['user']
+            }
+        };
+
         this.users['testuser@example.com'] = {
             password: 'Password123',
             userData: {
@@ -40,6 +50,10 @@ export class AuthMockRepository implements IAuthRepository {
                 roles: ['admin', 'user']
             }
         };
+
+        this.logger.info('Mock auth repository initialized with test users', {
+            users: Object.keys(this.users).join(', ')
+        });
     }
 
     async login(request: LoginRequest): Promise<LoginResponse | null> {

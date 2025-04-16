@@ -58,44 +58,55 @@ import {
     ClearSelectedProductsUseCase
 } from '../../features/products/useCases';
 
+// Create a container instance once
 const container = new Container();
 
-// Infrastructure
-container.bind<IHttpClient>(TYPES.HttpClient).to(AxiosHttpClientAdapter).inSingletonScope();
-container.bind<IStorageService>(TYPES.StorageService).to(LocalStorageAdapter).inSingletonScope();
-container.bind<ILoggerService>(TYPES.LoggerService).to(ConsoleLoggerService).inSingletonScope();
+// Configure the container
+function configureContainer() {
+    // Infrastructure
+    container.bind<IHttpClient>(TYPES.HttpClient).to(AxiosHttpClientAdapter).inSingletonScope();
+    container.bind<IStorageService>(TYPES.StorageService).to(LocalStorageAdapter).inSingletonScope();
+    container.bind<ILoggerService>(TYPES.LoggerService).to(ConsoleLoggerService).inSingletonScope();
 
-// Auth Feature
-// Using the real API repository for authentication
-container.bind<IAuthRepository>(TYPES.AuthRepository).to(AuthApiRepository).inSingletonScope();
-// container.bind<IAuthRepository>(TYPES.AuthRepository).to(AuthMockRepository).inSingletonScope();
+    // Auth Feature
+    // Using the real API repository for authentication
+    container.bind<IAuthRepository>(TYPES.AuthRepository).to(AuthApiRepository).inSingletonScope();
+    // container.bind<IAuthRepository>(TYPES.AuthRepository).to(AuthMockRepository).inSingletonScope();
 
-// Repositories
-container.bind<IUserRepository>(TYPES.UserRepository).to(UserApiRepository).inSingletonScope();
-// Using the real API repository for products
-container.bind<IProductRepository>(TYPES.ProductRepository).to(ProductApiRepository).inSingletonScope();
-// container.bind<IProductRepository>(TYPES.ProductRepository).to(ProductMockRepository).inSingletonScope();
+    // Repositories
+    container.bind<IUserRepository>(TYPES.UserRepository).to(UserApiRepository).inSingletonScope();
+    // Using the real API repository for products
+    container.bind<IProductRepository>(TYPES.ProductRepository).to(ProductApiRepository).inSingletonScope();
+    // Comment out the mock repository
+    // container.bind<IProductRepository>(TYPES.ProductRepository).to(ProductMockRepository).inSingletonScope();
 
-// Services
-container.bind<IUserService>(TYPES.UserService).to(UserService).inSingletonScope();
-container.bind<IAuthService>(TYPES.AuthService).to(AuthService).inSingletonScope();
-container.bind<IProductService>(TYPES.ProductService).to(ProductService).inSingletonScope();
+    // Services
+    container.bind<IUserService>(TYPES.UserService).to(UserService).inSingletonScope();
+    container.bind<IAuthService>(TYPES.AuthService).to(AuthService).inSingletonScope();
+    container.bind<IProductService>(TYPES.ProductService).to(ProductService).inSingletonScope();
 
-// User and Auth Use Cases
-container.bind<IGetUserProfileUseCase>(TYPES.GetUserProfileUseCase).to(GetUserProfileUseCase).inRequestScope();
-container.bind<ILoginUseCase>(TYPES.LoginUseCase).to(LoginUseCase).inRequestScope();
-container.bind<IRegisterUseCase>(TYPES.RegisterUseCase).to(RegisterUseCase).inRequestScope();
+    // User and Auth Use Cases
+    container.bind<IGetUserProfileUseCase>(TYPES.GetUserProfileUseCase).to(GetUserProfileUseCase).inRequestScope();
+    container.bind<ILoginUseCase>(TYPES.LoginUseCase).to(LoginUseCase).inRequestScope();
+    container.bind<IRegisterUseCase>(TYPES.RegisterUseCase).to(RegisterUseCase).inRequestScope();
 
-// Product Use Cases
-container.bind<GetProductsUseCase>(TYPES.GetProductsUseCase).to(GetProductsUseCase).inRequestScope();
-container.bind<GetProductByIdUseCase>(TYPES.GetProductByIdUseCase).to(GetProductByIdUseCase).inRequestScope();
-container.bind<GetSelectedProductsUseCase>(TYPES.GetSelectedProductsUseCase).to(GetSelectedProductsUseCase).inRequestScope();
-container.bind<CreateProductUseCase>(TYPES.CreateProductUseCase).to(CreateProductUseCase).inRequestScope();
-container.bind<UpdateProductUseCase>(TYPES.UpdateProductUseCase).to(UpdateProductUseCase).inRequestScope();
-container.bind<DeleteProductUseCase>(TYPES.DeleteProductUseCase).to(DeleteProductUseCase).inRequestScope();
-container.bind<SelectProductUseCase>(TYPES.SelectProductUseCase).to(SelectProductUseCase).inRequestScope();
-container.bind<UnselectProductUseCase>(TYPES.UnselectProductUseCase).to(UnselectProductUseCase).inRequestScope();
-container.bind<GetSelectedProductIdsUseCase>(TYPES.GetSelectedProductIdsUseCase).to(GetSelectedProductIdsUseCase).inRequestScope();
-container.bind<ClearSelectedProductsUseCase>(TYPES.ClearSelectedProductsUseCase).to(ClearSelectedProductsUseCase).inRequestScope();
+    // Product Use Cases
+    container.bind<GetProductsUseCase>(TYPES.GetProductsUseCase).to(GetProductsUseCase).inRequestScope();
+    container.bind<GetProductByIdUseCase>(TYPES.GetProductByIdUseCase).to(GetProductByIdUseCase).inRequestScope();
+    container.bind<GetSelectedProductsUseCase>(TYPES.GetSelectedProductsUseCase).to(GetSelectedProductsUseCase).inRequestScope();
+    container.bind<CreateProductUseCase>(TYPES.CreateProductUseCase).to(CreateProductUseCase).inRequestScope();
+    container.bind<UpdateProductUseCase>(TYPES.UpdateProductUseCase).to(UpdateProductUseCase).inRequestScope();
+    container.bind<DeleteProductUseCase>(TYPES.DeleteProductUseCase).to(DeleteProductUseCase).inRequestScope();
+    container.bind<SelectProductUseCase>(TYPES.SelectProductUseCase).to(SelectProductUseCase).inRequestScope();
+    container.bind<UnselectProductUseCase>(TYPES.UnselectProductUseCase).to(UnselectProductUseCase).inRequestScope();
+    container.bind<GetSelectedProductIdsUseCase>(TYPES.GetSelectedProductIdsUseCase).to(GetSelectedProductIdsUseCase).inRequestScope();
+    container.bind<ClearSelectedProductsUseCase>(TYPES.ClearSelectedProductsUseCase).to(ClearSelectedProductsUseCase).inRequestScope();
 
+    return container;
+}
+
+// Configure the container immediately
+configureContainer();
+
+// Export the already configured container
 export { container }; 

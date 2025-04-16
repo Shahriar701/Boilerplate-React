@@ -1,4 +1,4 @@
-import { injectable, inject } from 'inversify';
+import { injectable, inject, LazyServiceIdentifier } from 'inversify';
 import { TYPES } from '../../../../app/config/types';
 import { User } from '../../../../domain/entities/user.entity';
 import { IUserService } from '../../services/interfaces/user-service.interface';
@@ -8,8 +8,8 @@ import { ILogger } from '../../../../infrastructure/logging/logger.interface';
 @injectable()
 export class GetUserProfileUseCase implements IGetUserProfileUseCase {
   constructor(
-    @inject(TYPES.IUserService) private userService: IUserService,
-    @inject(TYPES.ILogger) private logger: ILogger
+    @inject(new LazyServiceIdentifier(() => TYPES.UserService)) private userService: IUserService,
+    @inject(new LazyServiceIdentifier(() => TYPES.LoggerService)) private logger: ILogger
   ) {}
 
   async execute(params: GetUserProfileParams): Promise<User> {

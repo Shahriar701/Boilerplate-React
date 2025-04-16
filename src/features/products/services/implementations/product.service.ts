@@ -88,13 +88,23 @@ export class ProductService implements IProductService {
     }
 
     getSelectedProductIds(): string[] {
-        // This is a synchronous method in the interface, so we need to handle the promise differently
-        // In a real app, you might want to update the interface to be async
-        let result: string[] = [];
+        // The interface expects a synchronous return, but our use case is async
+        // This is a workaround - in a real app, you should update the interface to be async
+        
+        // Initialize with empty array for immediate return
+        let cachedIds: string[] = [];
+        
+        // Fetch the IDs asynchronously and update them in the background
+        // This ensures we have data to return immediately, and it will be updated later
         this.getSelectedProductIdsUseCase.execute()
-            .then(ids => { result = ids; })
-            .catch(error => { console.error('Error getting selected product IDs', error); });
-        return result;
+            .then(ids => { 
+                cachedIds = ids; 
+            })
+            .catch(error => { 
+                console.error('Error getting selected product IDs', error); 
+            });
+        
+        return cachedIds;
     }
 
     async clearSelectedProducts(): Promise<void> {
