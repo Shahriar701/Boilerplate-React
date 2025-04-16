@@ -2,9 +2,11 @@ import { injectable, inject } from 'inversify';
 import { TYPES } from '../../../../app/config/types';
 import { IProductService } from '../product.service.interface';
 import { ProductDto, ProductFilterRequest, ProductListResponse } from '../../models/product.dto';
-import {
-    GetProductsUseCase,
-    GetProductByIdUseCase,
+import { 
+    IUseCase,
+    IUseCaseNoInput,
+    GetProductsUseCase, 
+    GetProductByIdUseCase, 
     GetSelectedProductsUseCase,
     CreateProductUseCase,
     UpdateProductUseCase,
@@ -19,38 +21,38 @@ import {
 export class ProductService implements IProductService {
     constructor(
         // Product retrieval use cases
-        @inject(TYPES.GetProductsUseCase)
+        @inject(TYPES.GetProductsUseCase) 
         private readonly getProductsUseCase: GetProductsUseCase,
-
-        @inject(TYPES.GetProductByIdUseCase)
+        
+        @inject(TYPES.GetProductByIdUseCase) 
         private readonly getProductByIdUseCase: GetProductByIdUseCase,
-
-        @inject(TYPES.GetSelectedProductsUseCase)
+        
+        @inject(TYPES.GetSelectedProductsUseCase) 
         private readonly getSelectedProductsUseCase: GetSelectedProductsUseCase,
-
+        
         // Product management use cases
-        @inject(TYPES.CreateProductUseCase)
+        @inject(TYPES.CreateProductUseCase) 
         private readonly createProductUseCase: CreateProductUseCase,
-
-        @inject(TYPES.UpdateProductUseCase)
+        
+        @inject(TYPES.UpdateProductUseCase) 
         private readonly updateProductUseCase: UpdateProductUseCase,
-
-        @inject(TYPES.DeleteProductUseCase)
+        
+        @inject(TYPES.DeleteProductUseCase) 
         private readonly deleteProductUseCase: DeleteProductUseCase,
-
+        
         // Product selection use cases
-        @inject(TYPES.SelectProductUseCase)
+        @inject(TYPES.SelectProductUseCase) 
         private readonly selectProductUseCase: SelectProductUseCase,
-
-        @inject(TYPES.UnselectProductUseCase)
+        
+        @inject(TYPES.UnselectProductUseCase) 
         private readonly unselectProductUseCase: UnselectProductUseCase,
-
-        @inject(TYPES.GetSelectedProductIdsUseCase)
+        
+        @inject(TYPES.GetSelectedProductIdsUseCase) 
         private readonly getSelectedProductIdsUseCase: GetSelectedProductIdsUseCase,
-
-        @inject(TYPES.ClearSelectedProductsUseCase)
+        
+        @inject(TYPES.ClearSelectedProductsUseCase) 
         private readonly clearSelectedProductsUseCase: ClearSelectedProductsUseCase
-    ) { }
+    ) {}
 
     // Product retrieval methods
     async getProducts(filter: ProductFilterRequest): Promise<ProductListResponse> {
@@ -88,23 +90,13 @@ export class ProductService implements IProductService {
     }
 
     getSelectedProductIds(): string[] {
-        // The interface expects a synchronous return, but our use case is async
-        // This is a workaround - in a real app, you should update the interface to be async
-        
-        // Initialize with empty array for immediate return
-        let cachedIds: string[] = [];
-        
-        // Fetch the IDs asynchronously and update them in the background
-        // This ensures we have data to return immediately, and it will be updated later
+        // This is a synchronous method in the interface, so we need to handle the promise differently
+        // In a real app, you might want to update the interface to be async
+        let result: string[] = [];
         this.getSelectedProductIdsUseCase.execute()
-            .then(ids => { 
-                cachedIds = ids; 
-            })
-            .catch(error => { 
-                console.error('Error getting selected product IDs', error); 
-            });
-        
-        return cachedIds;
+            .then(ids => { result = ids; })
+            .catch(error => { console.error('Error getting selected product IDs', error); });
+        return result;
     }
 
     async clearSelectedProducts(): Promise<void> {

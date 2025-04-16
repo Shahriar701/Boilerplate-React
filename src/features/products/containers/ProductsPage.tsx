@@ -6,11 +6,11 @@ import { IAuthService } from '../../../features/auth/services/auth.service.inter
 import { ProductDto, ProductFilterRequest } from '../models/product.dto';
 import ProductList from '../components/ProductList';
 import { useAppDispatch, useAppSelector } from '../../../store/store.config';
-import { 
-    fetchProducts, 
-    setFilters, 
-    updateProduct, 
-    deleteProduct, 
+import {
+    fetchProducts,
+    setFilters,
+    updateProduct,
+    deleteProduct,
     createProduct as createProductAction,
     selectProductsList,
     selectProductsLoading,
@@ -24,7 +24,7 @@ const ProductsPage: React.FC = () => {
     const dispatch = useAppDispatch();
     const productService = useInjection<IProductService>(TYPES.ProductService);
     const authService = useInjection<IAuthService>(TYPES.AuthService);
-    
+
     // Get product state from Redux using selectors with default values to prevent undefined errors
     const products = useAppSelector(selectProductsList) || [];
     const isLoading = useAppSelector(selectProductsLoading) || false;
@@ -39,10 +39,10 @@ const ProductsPage: React.FC = () => {
         page: 1,
         pageSize: 10
     };
-    
+
     // Get product selection functionality from custom hook
     const { selectedIds, selectProduct, unselectProduct, clearSelectedProducts } = useProductSelection();
-    
+
     const [isAdmin, setIsAdmin] = useState(false);
 
     // Debug info for products

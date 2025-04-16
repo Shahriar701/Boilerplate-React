@@ -18,22 +18,22 @@ const NotFound = () => <div>404 Not Found</div>;
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const authService = useInjection<IAuthService>(TYPES.AuthService);
   const isAuthenticated = authService.isAuthenticated();
-  
+
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
-  
+
   return <>{children}</>;
 };
 
 const AppRoutes: React.FC = () => {
   const [isReady, setIsReady] = useState(false);
-  
+
   useEffect(() => {
     // Small delay to ensure auth state is loaded properly
     setIsReady(true);
   }, []);
-  
+
   if (!isReady) {
     return <div>Loading...</div>;
   }
