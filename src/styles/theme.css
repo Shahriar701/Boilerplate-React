@@ -1,0 +1,129 @@
+/* Dark Theme Color Palette */
+:root {
+  /* Main background colors */
+  --color-background-primary: #121212;
+  --color-background-secondary: #1e1e1e;
+  --color-background-tertiary: #2d2d2d;
+  --color-background-card: #2a2a2a;
+  --color-background-input: #333333;
+  --color-background-modal: rgba(0, 0, 0, 0.7);
+  
+  /* Text colors */
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #e0e0e0;
+  --color-text-tertiary: #b0b0b0;
+  --color-text-disabled: #6c6c6c;
+  
+  /* Border colors */
+  --color-border-light: #404040;
+  --color-border-focus: #4d90fe;
+  --color-border-hover: #505050;
+  
+  /* UI accent colors - preserve brand colors */
+  --color-primary: #2196f3;
+  --color-primary-light: #64b5f6;
+  --color-primary-dark: #1976d2;
+  --color-success: #4caf50;
+  --color-warning: #ff9800;
+  --color-error: #f44336;
+  --color-info: #2196f3;
+  
+  /* Status colors */
+  --color-success-bg: rgba(76, 175, 80, 0.15);
+  --color-warning-bg: rgba(255, 152, 0, 0.15);
+  --color-error-bg: rgba(244, 67, 54, 0.15);
+  --color-info-bg: rgba(33, 150, 243, 0.15);
+  
+  /* Shadows */
+  --shadow-card: 0 4px 6px rgba(0, 0, 0, 0.25);
+  --shadow-dropdown: 0 8px 16px rgba(0, 0, 0, 0.35);
+  --shadow-button: 0 2px 4px rgba(0, 0, 0, 0.3);
+  
+  /* Input/Output specific */
+  --color-input-placeholder: #808080;
+  --color-code-background: #2b2b2b;
+  --color-code-text: #e6e6e6;
+  
+  /* Badge colors */
+  --color-badge-text: #1e1e1e;
+  --color-badge-text-dark: #ffffff;
+  
+  /* Badge specific colors */
+  --color-badge-image: #c0f5ff;
+  --color-badge-text-type: #ffd8cc; 
+  --color-badge-audio: #d4ffd6;
+  --color-badge-json: #ffe8b3;
+  
+  /* Card gradients for hover effects */
+  --card-hover-gradient: linear-gradient(145deg, #232323, #2b2b2b);
+  
+  /* UI Component colors */
+  --color-button-primary-text: #ffffff;
+  --color-button-secondary-text: #ffffff;
+  --color-button-disabled-bg: #3a3a3a;
+  --color-button-disabled-text: #8d8d8d;
+  
+  /* Scrollbar */
+  --color-scrollbar-track: #1a1a1a;
+  --color-scrollbar-thumb: #464646;
+  --color-scrollbar-thumb-hover: #5a5a5a;
+}
+
+/* Custom scrollbar for dark theme */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-scrollbar-track);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-scrollbar-thumb);
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-scrollbar-thumb-hover);
+}
+
+/* Apply dark theme to the body */
+body {
+  background-color: var(--color-background-primary);
+  color: var(--color-text-primary);
+}
+
+/* Global adjustments for dark mode */
+a {
+  color: var(--color-primary);
+}
+
+a:hover {
+  color: var(--color-primary-light);
+}
+
+input, textarea, select {
+  background-color: var(--color-background-input);
+  color: var(--color-text-primary);
+  border-color: var(--color-border-light);
+}
+
+input:focus, textarea:focus, select:focus {
+  border-color: var(--color-border-focus);
+  outline: none;
+}
+
+button {
+  background-color: var(--color-primary);
+  color: var(--color-button-primary-text);
+}
+
+button:hover:not(:disabled) {
+  background-color: var(--color-primary-dark);
+}
+
+button:disabled {
+  background-color: var(--color-button-disabled-bg);
+  color: var(--color-button-disabled-text);
+} 

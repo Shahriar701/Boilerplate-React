@@ -843,3 +843,213 @@ By following these steps, you maintain the clean architecture and separation of 
 ## License
 
 This project is licensed under the MIT License.
+
+# ML Model Testing Platform Frontend
+
+A React application for testing and evaluating machine learning models.
+
+## Authentication System
+
+This project includes a complete authentication system with the following features:
+
+- User login and registration
+- Protected routes that require authentication
+- User profile information in the header
+- Persistent authentication via localStorage
+
+### Demo Credentials
+
+The application comes with two pre-configured user accounts for testing:
+
+1. **Regular User**
+   - Email: `user@example.com`
+   - Password: `password123`
+
+2. **Admin User**
+   - Email: `admin@example.com`
+   - Password: `admin123`
+
+### Authentication Flow
+
+1. Unauthenticated users are redirected to the login page
+2. After successful authentication, users are redirected to the Models page
+3. The header displays the logged-in user's name and provides a dropdown menu for logout
+4. Authentication state persists across page refreshes
+
+### Implementation Details
+
+The authentication system is built using the following components:
+
+- **AuthContext**: Provides authentication state and methods throughout the application
+- **ProtectedRoute**: Wraps components that require authentication and redirects unauthenticated users
+- **LoginPage / RegisterPage**: User-friendly forms for authentication
+- **Header**: Displays authentication status and user information
+
+## ML Models
+
+The application showcases machine learning models with the following features:
+
+- List view of available models with details (accuracy, last tested date)
+- Detailed model view with specifications
+- Interactive model testing interface
+
+## Development
+
+### Prerequisites
+
+- Node.js 14+ and npm
+
+### Installation
+
+1. Clone the repository
+2. Install dependencies:
+   ```
+   npm install
+   ```
+3. Start the development server:
+   ```
+   npm run dev
+   ```
+
+### Build
+
+To build the application for production:
+
+```
+npm run build
+```
+
+## Implementation Notes
+
+- The authentication system uses localStorage for persistence
+- All API calls are simulated with timeouts to mimic real-world behavior
+- The application uses dummy data for demonstration purposes
+
+## Future Enhancements
+
+- Connect to a real backend API
+- Add user profile management
+- Implement model result history
+- Add real-time notifications for test results
+
+## API Endpoints for ML Model Testing Platform
+
+Below is a comprehensive list of API endpoints needed to implement to make this application fully dynamic instead of using mock data:
+
+### Authentication APIs
+
+1. **POST /api/auth/register**
+   - Purpose: Register a new user
+   - Request Body: `{ email, password, name }`
+   - Response: `{ user: { id, email, name }, token }`
+
+2. **POST /api/auth/login**
+   - Purpose: Authenticate a user
+   - Request Body: `{ email, password }`
+   - Response: `{ user: { id, email, name }, token }`
+
+3. **GET /api/auth/me**
+   - Purpose: Get current user information
+   - Headers: `Authorization: Bearer {token}`
+   - Response: `{ id, email, name, role }`
+
+4. **POST /api/auth/logout**
+   - Purpose: Invalidate current session
+   - Headers: `Authorization: Bearer {token}`
+   - Response: `{ success: true }`
+
+### Models APIs
+
+1. **GET /api/models**
+   - Purpose: List all available models
+   - Query Parameters: `page`, `limit`, `sort`, `filter`
+   - Response: `{ models: [{ id, name, description, accuracy, lastTested, imageUrl, inputType, outputType }], pagination: { total, page, limit } }`
+
+2. **GET /api/models/:id**
+   - Purpose: Get detailed model information
+   - Response: `{ id, name, description, accuracy, lastTested, imageUrl, inputType, outputType, details: { framework, version, size, type, created, author } }`
+
+3. **POST /api/models/:id/test**
+   - Purpose: Run a model with input data
+   - Headers: `Authorization: Bearer {token}`
+   - Request Body: Varies based on model's inputType:
+     - Image: `{ imageUrl: string }` or `{ imageData: base64 }`
+     - Text: `{ text: string }`
+     - Audio: `{ audioUrl: string }` or `{ audioData: base64 }`
+     - JSON: `{ data: object }`
+   - Response: Varies based on model's outputType:
+     - Image: `{ imageUrl: string, annotations: [{ id, label, confidence, x, y, width, height }] }`
+     - Text: `{ text: string }`
+     - Audio: `{ audioUrl: string, transcript: string }`
+     - JSON: `{ analysis: object }`
+
+4. **GET /api/models/:id/history**
+   - Purpose: Get history of tests for a specific model
+   - Headers: `Authorization: Bearer {token}`
+   - Response: `{ tests: [{ id, timestamp, input, output, accuracy, userId }] }`
+
+### Admin APIs (for managing models)
+
+1. **POST /api/admin/models**
+   - Purpose: Create a new model
+   - Headers: `Authorization: Bearer {token}`
+   - Request Body: `{ name, description, imageUrl, inputType, outputType, details }`
+   - Response: `{ id, name, description, ... }`
+
+2. **PUT /api/admin/models/:id**
+   - Purpose: Update model details
+   - Headers: `Authorization: Bearer {token}`
+   - Request Body: `{ name, description, imageUrl, inputType, outputType, details }`
+   - Response: `{ id, name, description, ... }`
+
+3. **DELETE /api/admin/models/:id**
+   - Purpose: Remove a model
+   - Headers: `Authorization: Bearer {token}`
+   - Response: `{ success: true }`
+
+### User Management APIs
+
+1. **GET /api/users/profile**
+   - Purpose: Get user profile
+   - Headers: `Authorization: Bearer {token}`
+   - Response: `{ id, name, email, testCount, favoriteModels }`
+
+2. **PUT /api/users/profile**
+   - Purpose: Update user profile
+   - Headers: `Authorization: Bearer {token}`
+   - Request Body: `{ name, email, password }`
+   - Response: `{ id, name, email }`
+
+3. **GET /api/users/tests**
+   - Purpose: Get tests history for current user
+   - Headers: `Authorization: Bearer {token}`
+   - Response: `{ tests: [{ id, modelId, modelName, timestamp, inputType, outputType }] }`
+
+### Implementation Strategy
+
+1. **Backend Technology Stack Options**:
+   - Node.js with Express
+   - Python with FastAPI or Flask
+   - Java with Spring Boot
+   - .NET Core
+   
+2. **Authentication Implementation**:
+   - JWT (JSON Web Tokens) for stateless authentication
+   - Refresh token strategy for longer sessions
+   - Role-based permissions system
+
+3. **Database Options**:
+   - PostgreSQL or MySQL for relational data
+   - MongoDB for more flexible document storage
+   - Firebase for rapid development
+
+4. **File Storage for Images/Audio**:
+   - AWS S3 or Google Cloud Storage
+   - Azure Blob Storage
+   - Local file system (for development)
+
+5. **Machine Learning Model Integration**:
+   - Direct integration with TensorFlow/PyTorch models
+   - API connection to model serving systems like TensorFlow Serving
+   - Integration with cloud ML platforms (AWS SageMaker, Google AI Platform)
+   - Docker containers for model isolation and scalability

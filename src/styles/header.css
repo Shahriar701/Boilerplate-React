@@ -1,0 +1,132 @@
+/* Header Styles */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 2rem;
+  background-color: var(--color-background-secondary);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+}
+
+.header .models-hero-title {
+  margin: 0;
+  text-align: left;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.logo h1 {
+  font-size: 1.8rem;
+  color: var(--color-text-primary);
+  margin: 0;
+  text-align: center;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+
+.header-highlight {
+  color: var(--color-primary);
+  position: relative;
+  font-weight: 700;
+}
+
+.header-highlight::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, var(--color-primary), transparent);
+  border-radius: 2px;
+}
+
+/* Authentication controls */
+.header-actions {
+  display: flex;
+  align-items: center;
+}
+
+.auth-controls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.user-greeting {
+  color: var(--color-text-secondary);
+  font-size: 0.9rem;
+}
+
+.logout-button {
+  background-color: transparent;
+  border: 1px solid var(--color-primary);
+  color: var(--color-primary);
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.logout-button:hover {
+  background-color: var(--color-primary);
+  color: var(--color-button-primary-text);
+}
+
+.auth-buttons {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.login-link {
+  color: var(--color-text-primary);
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: color 0.2s ease;
+}
+
+.login-link:hover {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+.register-button {
+  background-color: var(--color-primary);
+  color: var(--color-button-primary-text);
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  text-decoration: none;
+  transition: background-color 0.2s ease;
+}
+
+.register-button:hover {
+  background-color: var(--color-primary-dark);
+  text-decoration: none;
+}
+
+@media (max-width: 768px) {
+  .header {
+    padding: 1.2rem 1rem;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .header .models-hero-title {
+    text-align: center;
+  }
+  
+  .logo h1 {
+    font-size: 1.5rem;
+  }
+  
+  .auth-controls, .auth-buttons {
+    margin-top: 0.5rem;
+  }
+} 

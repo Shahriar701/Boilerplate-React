@@ -1,0 +1,308 @@
+/* Models Page Styling */
+.models-page {
+  min-height: 100vh;
+  background-color: var(--color-background-primary);
+  display: flex;
+  flex-direction: column;
+}
+
+.models-container {
+  flex: 1;
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* Hero Section Styles */
+.models-hero {
+  text-align: center;
+  margin-bottom: 3rem;
+  padding: 2rem 0;
+  position: relative;
+}
+
+.models-hero::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 4px;
+  background: linear-gradient(90deg, var(--color-primary), transparent);
+  border-radius: 2px;
+}
+
+.models-hero-title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  margin-bottom: 1rem;
+  line-height: 1.2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.models-hero-title .primary-text {
+  color: var(--color-primary);
+  position: relative;
+  display: inline-block;
+}
+
+.models-hero-title .secondary-text {
+  color: var(--color-text-primary);
+  font-size: 2rem;
+}
+
+.models-hero-description {
+  max-width: 700px;
+  margin: 0 auto;
+  font-size: 1.2rem;
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+}
+
+.welcome-message {
+  font-size: 1.3rem !important;
+  margin: 1.5rem 0;
+  font-weight: 500;
+  color: var(--color-text-primary) !important;
+}
+
+.models-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 1.5rem;
+}
+
+.model-card {
+  background: var(--color-background-card);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.model-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-dropdown);
+}
+
+.model-image {
+  height: 180px;
+  overflow: hidden;
+  background-color: var(--color-background-secondary);
+}
+
+.model-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.model-card:hover .model-image img {
+  transform: scale(1.05);
+}
+
+.model-content {
+  padding: 1.5rem;
+}
+
+.model-content h2 {
+  color: var(--color-text-primary);
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+}
+
+.model-description {
+  color: var(--color-text-secondary);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin-bottom: 1.25rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  height: 4rem;
+}
+
+.model-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.stat-label {
+  font-size: 0.8rem;
+  color: var(--color-text-tertiary);
+  font-weight: 500;
+}
+
+.stat-value {
+  font-size: 0.9rem;
+  color: var(--color-text-primary);
+  font-weight: 500;
+}
+
+.accuracy-bar-container {
+  height: 8px;
+  background-color: var(--color-background-tertiary);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 0.25rem;
+}
+
+.accuracy-bar {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.5s ease-out;
+  background-color: var(--color-primary);
+}
+
+.accuracy-value {
+  font-size: 0.9rem;
+  color: var(--color-text-primary);
+  font-weight: 600;
+}
+
+/* IO Type Badges */
+.model-io-types {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.io-badge {
+  font-size: 0.8rem;
+  color: var(--color-badge-text);
+  background-color: var(--color-background-tertiary);
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.io-badge.image {
+  background-color: var(--color-badge-image);
+}
+
+.io-badge.text {
+  background-color: var(--color-badge-text-type);
+}
+
+.io-badge.audio {
+  background-color: var(--color-badge-audio);
+}
+
+.io-badge.json {
+  background-color: var(--color-badge-json);
+}
+
+.test-model-button {
+  display: block;
+  background-color: var(--color-primary);
+  color: var(--color-button-primary-text);
+  text-align: center;
+  padding: 0.75rem;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+.test-model-button:hover {
+  background-color: var(--color-primary-dark);
+}
+
+/* Loading state */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 60vh;
+  gap: 1rem;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid var(--color-background-tertiary);
+  border-radius: 50%;
+  border-top-color: var(--color-primary);
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-container p {
+  color: var(--color-text-secondary);
+  font-size: 1rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .models-container {
+    padding: 1.5rem;
+  }
+  
+  .models-grid {
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1rem;
+  }
+  
+  .models-hero-title {
+    font-size: 2rem;
+  }
+  
+  .models-hero-title .secondary-text {
+    font-size: 1.7rem;
+  }
+  
+  .models-hero-description {
+    font-size: 1.1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .models-header h1 {
+    font-size: 1.75rem;
+  }
+  
+  .models-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .model-content {
+    padding: 1.25rem;
+  }
+  
+  .models-hero-title {
+    font-size: 1.75rem;
+  }
+  
+  .models-hero-title .secondary-text {
+    font-size: 1.4rem;
+  }
+  
+  .models-hero-description {
+    font-size: 1rem;
+  }
+} 
