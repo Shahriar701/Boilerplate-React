@@ -173,14 +173,14 @@ const ModelsPage: React.FC = () => {
                     <span className="stat-value">{model.lastTested}</span>
                   </div>
                   
-                  <div className="model-io-types">
+                  {/* <div className="model-io-types">
                     <span className="io-badge">
                       Input: {getInputTypeIcon(model.inputType)} {model.inputType}
                     </span>
                     <span className="io-badge">
                       Output: {getInputTypeIcon(model.outputType)} {model.outputType}
                     </span>
-                  </div>
+                  </div> */}
                 </div>
                 
                 <Link to={`/models/${model.id}`} className="test-model-button">

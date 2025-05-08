@@ -61,6 +61,28 @@ import {
 // Product use case types for proper interface binding
 import { ProductDto, ProductFilterRequest, ProductListResponse } from '../../features/products/models/product.dto';
 
+// Imports for Model Feature
+import { IModelRepository } from '../../features/models/repositories/model.repository.interface';
+import { ModelApiRepository } from '../../features/models/repositories/implementations/model-api.repository';
+import { IModelService } from '../../features/models/services/model.service.interface';
+import { ModelService } from '../../features/models/services/implementations/model.service';
+
+// Model use cases
+import {
+    IGetModelsUseCase,
+    IGetModelByIdUseCase,
+    ITestModelUseCase,
+    IGetModelTestHistoryUseCase,
+    GetModelsUseCase,
+    GetModelByIdUseCase,
+    TestModelUseCase,
+    GetModelTestHistoryUseCase
+} from '../../features/models/useCases';
+
+// Model types
+import { ModelDto, ModelFilterRequest, ModelListResponse, ModelTestRequest } from '../../features/models/models/model.dto';
+import { ModelInputData, ModelOutputData } from '../../types/model.types';
+
 const container = new Container();
 
 // Infrastructure
@@ -79,10 +101,14 @@ container.bind<IUserRepository>(TYPES.UserRepository).to(UserApiRepository).inSi
 container.bind<IProductRepository>(TYPES.ProductRepository).to(ProductApiRepository).inSingletonScope();
 // container.bind<IProductRepository>(TYPES.ProductRepository).to(ProductMockRepository).inSingletonScope();
 
+// Models Repository
+container.bind<IModelRepository>(TYPES.ModelRepository).to(ModelApiRepository).inSingletonScope();
+
 // Services
 container.bind<IUserService>(TYPES.UserService).to(UserService).inSingletonScope();
 container.bind<IAuthService>(TYPES.AuthService).to(AuthService).inSingletonScope();
 container.bind<IProductService>(TYPES.ProductService).to(ProductService).inSingletonScope();
+container.bind<IModelService>(TYPES.ModelService).to(ModelService).inSingletonScope();
 
 // User and Auth Use Cases
 container.bind<IGetUserProfileUseCase>(TYPES.GetUserProfileUseCase).to(GetUserProfileUseCase).inRequestScope();
@@ -100,5 +126,11 @@ container.bind<IUseCase<string, void>>(TYPES.SelectProductUseCase).to(SelectProd
 container.bind<IUseCase<string, void>>(TYPES.UnselectProductUseCase).to(UnselectProductUseCase).inRequestScope();
 container.bind<IUseCaseNoInput<string[]>>(TYPES.GetSelectedProductIdsUseCase).to(GetSelectedProductIdsUseCase).inRequestScope();
 container.bind<IUseCaseNoInput<void>>(TYPES.ClearSelectedProductsUseCase).to(ClearSelectedProductsUseCase).inRequestScope();
+
+// Model Use Cases
+container.bind<IGetModelsUseCase>(TYPES.GetModelsUseCase).to(GetModelsUseCase).inRequestScope();
+container.bind<IGetModelByIdUseCase>(TYPES.GetModelByIdUseCase).to(GetModelByIdUseCase).inRequestScope();
+container.bind<ITestModelUseCase>(TYPES.TestModelUseCase).to(TestModelUseCase).inRequestScope();
+container.bind<IGetModelTestHistoryUseCase>(TYPES.GetModelTestHistoryUseCase).to(GetModelTestHistoryUseCase).inRequestScope();
 
 export { container }; 

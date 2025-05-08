@@ -24,6 +24,14 @@ export const TYPES = {
   ProductRepository: Symbol.for('ProductRepository'),
   ProductService: Symbol.for('ProductService'),
 
+  // Models Feature
+  ModelRepository: Symbol.for('ModelRepository'),
+  ModelService: Symbol.for('ModelService'),
+  GetModelsUseCase: Symbol.for('GetModelsUseCase'),
+  GetModelByIdUseCase: Symbol.for('GetModelByIdUseCase'),
+  TestModelUseCase: Symbol.for('TestModelUseCase'),
+  GetModelTestHistoryUseCase: Symbol.for('GetModelTestHistoryUseCase'),
+
   // Product Use Cases
   GetProductsUseCase: Symbol.for('GetProductsUseCase'),
   GetProductByIdUseCase: Symbol.for('GetProductByIdUseCase'),
@@ -40,9 +48,11 @@ export const TYPES = {
   IUserRepository: Symbol.for('IUserRepository'),
   IAuthRepository: Symbol.for('IAuthRepository'),
   IProductRepository: Symbol.for('IProductRepository'),
+  IModelRepository: Symbol.for('IModelRepository'),
 
   // Services - for backward compatibility
   IProductService: Symbol.for('IProductService'),
+  IModelService: Symbol.for('IModelService'),
 
   // Use Cases - for backward compatibility
   IGetProductsUseCase: Symbol.for('IGetProductsUseCase'),
