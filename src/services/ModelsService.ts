@@ -163,7 +163,7 @@ export class ModelsService {
     }
   }
 
-  async getModelStatus(modelId: string): Promise<any> {
+  async getModelStatus(modelId: string): Promise<string> {
     try {
       const response = await fetch(`${this.baseUrl}/models/${modelId}/status`, {
         method: 'GET',
@@ -174,7 +174,11 @@ export class ModelsService {
         throw new Error(`Failed to get model status: ${response.statusText}`);
       }
 
-      return await response.json();
+      const statusResponse = await response.json();
+      console.log('Full status response:', statusResponse); // Debug log
+      
+      // Extract the status field from the ModelStatus object
+      return statusResponse.status || 'NOT_FOUND';
     } catch (error) {
       console.error(`Error getting model status ${modelId}:`, error);
       throw error;
@@ -189,23 +193,31 @@ export class ModelsService {
       if ('imageUrl' in inputData) {
         let imageData: string;
         
-        if (inputData.imageUrl.startsWith('data:')) {
-          // Extract base64 part from data URL (remove "data:image/...;base64," prefix)
-          imageData = inputData.imageUrl.split(',')[1];
-        } else if (inputData.imageUrl.startsWith('blob:')) {
-          // Handle blob URLs by converting to base64
-          if (inputData.file) {
-            // If we have the original file, convert it to base64
-            imageData = await this.fileToBase64(inputData.file);
+        // Check if we have a meaningful imageUrl or if we should use the file
+        if (inputData.imageUrl && inputData.imageUrl.trim() !== '') {
+          if (inputData.imageUrl.startsWith('data:')) {
+            // Extract base64 part from data URL (remove "data:image/...;base64," prefix)
+            imageData = inputData.imageUrl.split(',')[1];
+          } else if (inputData.imageUrl.startsWith('blob:')) {
+            // Handle blob URLs by converting to base64
+            if (inputData.file) {
+              // If we have the original file, convert it to base64
+              imageData = await this.fileToBase64(inputData.file);
+            } else {
+              // If we only have the blob URL, fetch and convert it
+              const response = await fetch(inputData.imageUrl);
+              const blob = await response.blob();
+              imageData = await this.blobToBase64(blob);
+            }
           } else {
-            // If we only have the blob URL, fetch and convert it
-            const response = await fetch(inputData.imageUrl);
-            const blob = await response.blob();
-            imageData = await this.blobToBase64(blob);
+            // If it's already just base64, use as is
+            imageData = inputData.imageUrl;
           }
+        } else if (inputData.file) {
+          // No meaningful imageUrl, but we have a file - convert file to base64
+          imageData = await this.fileToBase64(inputData.file);
         } else {
-          // If it's already just base64, use as is
-          imageData = inputData.imageUrl;
+          throw new Error('No image data provided - need either imageUrl or file');
         }
         
         requestBody = { image: imageData };

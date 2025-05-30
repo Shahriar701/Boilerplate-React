@@ -209,6 +209,20 @@
   align-items: center;
 }
 
+.status-info {
+  color: #94a3b8;
+  font-size: 14px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-info::before {
+  content: '⏳';
+  font-size: 16px;
+}
+
 .btn-primary {
   background: linear-gradient(135deg, #10b981, #059669);
   color: white;
@@ -717,4 +731,13 @@
     font-size: 13px;
     width: 100%;
   }
+}
+
+.model-badge-container {
+  justify-content: center;
+}
+
+.status-info {
+  justify-content: center;
+  text-align: center;
 } 

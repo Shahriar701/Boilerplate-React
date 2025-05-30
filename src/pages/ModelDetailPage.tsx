@@ -4,7 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { modelsService } from '../services/ModelsService';
 import ImageInput from '../components/inputs/ImageInput';
 import '../styles/model-detail.css';
-import { Model } from '../types/model.types';
+import { Model, ModelInputData } from '../types/model.types';
 
 const ModelDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -14,7 +14,7 @@ const ModelDetailPage: React.FC = () => {
   const [model, setModel] = useState<Model | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [modelStatus, setModelStatus] = useState<'RUNNING' | 'STOPPED' | 'STARTING' | 'STOPPING' | 'NOT_FOUND'>('NOT_FOUND');
+  const [modelStatus, setModelStatus] = useState<'RUNNING' | 'STOPPED' | 'STARTING' | 'STOPPING' | 'PENDING' | 'NOT_FOUND'>('NOT_FOUND');
   const [statusLoading, setStatusLoading] = useState(false);
   const [testResult, setTestResult] = useState<any>(null);
   const [testLoading, setTestLoading] = useState(false);
@@ -23,6 +23,7 @@ const ModelDetailPage: React.FC = () => {
 
   const isStartingRef = useRef(false);
   const isTestingRef = useRef(false);
+  const hasAttemptedAutoStartRef = useRef(false);
 
   useEffect(() => {
     if (id) {
@@ -30,6 +31,28 @@ const ModelDetailPage: React.FC = () => {
       fetchModelStatus();
     }
   }, [id]);
+
+  // Auto-start model when page loads and model is not running
+  useEffect(() => {
+    const autoStartModel = async () => {
+      if ((modelStatus === 'STOPPED' || modelStatus === 'NOT_FOUND') && !hasAttemptedAutoStartRef.current) {
+        console.log('Auto-starting model on page load...');
+        hasAttemptedAutoStartRef.current = true;
+        await startModelSafe();
+      }
+    };
+
+    // Reset auto-start flag when model becomes STOPPED (after being idle)
+    if (modelStatus === 'STOPPED' && hasAttemptedAutoStartRef.current) {
+      console.log('Model stopped (likely due to inactivity), allowing auto-restart...');
+      hasAttemptedAutoStartRef.current = false;
+    }
+
+    // Only auto-start if we have model status and it's not already running/starting
+    if (modelStatus !== 'RUNNING' && modelStatus !== 'STARTING' && modelStatus !== 'PENDING' && model && !hasAttemptedAutoStartRef.current) {
+      autoStartModel();
+    }
+  }, [modelStatus, model]); // Depend on modelStatus and model
 
   const fetchModelData = async () => {
     try {
@@ -49,7 +72,8 @@ const ModelDetailPage: React.FC = () => {
     try {
       setStatusLoading(true);
       const status = await modelsService.getModelStatus(id!);
-      setModelStatus(status);
+      console.log('Fetched model status:', status);
+      setModelStatus(status as any);
     } catch (err) {
       console.error('Error fetching model status:', err);
       setModelStatus('NOT_FOUND');
@@ -64,15 +88,18 @@ const ModelDetailPage: React.FC = () => {
     }
 
     try {
+      console.log('Starting model...');
       isStartingRef.current = true;
       setModelStatus('STARTING');
       await modelsService.startModel(id!);
+      console.log('Model start request completed');
       
       // Poll for status updates
       const pollInterval = setInterval(async () => {
         try {
           const status = await modelsService.getModelStatus(id!);
-          setModelStatus(status);
+          console.log('Polling status:', status);
+          setModelStatus(status as any);
           
           if (status === 'RUNNING' || status === 'STOPPED') {
             clearInterval(pollInterval);
@@ -113,18 +140,21 @@ const ModelDetailPage: React.FC = () => {
     if (!selectedFile || isTestingRef.current) return;
 
     try {
+      console.log('Starting image test with file:', selectedFile.name);
       isTestingRef.current = true;
       setTestLoading(true);
       setTestError(null);
       setTestResult(null);
 
       // Create input data in the correct format
-      const inputData = {
+      const inputData: ModelInputData = {
         imageUrl: '',
         file: selectedFile
       };
       
+      console.log('Calling invokeModel with:', inputData);
       const result = await modelsService.invokeModel(id!, inputData);
+      console.log('Model result received:', result);
       setTestResult(result);
     } catch (err: any) {
       console.error('Error testing model:', err);
@@ -150,6 +180,7 @@ const ModelDetailPage: React.FC = () => {
     switch (modelStatus) {
       case 'RUNNING': return { text: 'Running', color: '#10b981', dot: '🟢' };
       case 'STARTING': return { text: 'Starting', color: '#f59e0b', dot: '🟡' };
+      case 'PENDING': return { text: 'Pending', color: '#f59e0b', dot: '🟡' };
       case 'STOPPING': return { text: 'Stopping', color: '#f59e0b', dot: '🟡' };
       case 'STOPPED': return { text: 'Stopped', color: '#ef4444', dot: '🔴' };
       default: return { text: 'Unknown', color: '#6b7280', dot: '⚫' };
@@ -262,18 +293,26 @@ const ModelDetailPage: React.FC = () => {
                 </span>
               </div>
               <div className="action-buttons">
+                {/* Only show action buttons if model is running or manually stopped */}
                 {modelStatus === 'RUNNING' ? (
                   <button className="btn-danger" onClick={stopModel}>
                     Stop Model
                   </button>
-                ) : (
+                ) : modelStatus === 'STOPPED' ? (
                   <button 
                     className="btn-primary" 
                     onClick={startModelSafe}
-                    disabled={modelStatus === 'STARTING'}
+                    disabled={false}
                   >
-                    {modelStatus === 'STARTING' ? 'Starting...' : 'Start Model'}
+                    Start Model
                   </button>
+                ) : (
+                  /* Show status info for starting/pending states */
+                  <div className="status-info">
+                    {modelStatus === 'STARTING' && 'Starting model...'}
+                    {modelStatus === 'PENDING' && 'Model pending...'}
+                    {modelStatus === 'NOT_FOUND' && 'Initializing...'}
+                  </div>
                 )}
               </div>
             </div>
@@ -312,9 +351,9 @@ const ModelDetailPage: React.FC = () => {
                         </div>
                       ) : testResult ? (
                         <div className="output-result">
-                          {model.outputType === 'image' && testResult.output ? (
+                          {model.outputType === 'image' && testResult.imageUrl ? (
                             <img 
-                              src={`data:image/jpeg;base64,${testResult.output}`} 
+                              src={testResult.imageUrl} 
                               alt="Model output" 
                               className="output-image"
                             />
