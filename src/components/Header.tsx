@@ -9,7 +9,7 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ 
-  title = 'ML Model Platform',
+  title = 'Model Zoo',
   showTitle = true
 }) => {
   const { user, isAuthenticated, logout } = useAuth();
@@ -31,8 +31,7 @@ const Header: React.FC<HeaderProps> = ({
     if (!showTitle) {
       return (
         <h1 className="models-hero-title">
-          <span className="primary-text">AI Models</span>
-          <span className="secondary-text">Testing Platform</span>
+          <span className="primary-text">Model Zoo</span>
         </h1>
       );
     }
@@ -42,7 +41,7 @@ const Header: React.FC<HeaderProps> = ({
       const modelName = title.replace('Test:', '').trim();
       return (
         <h1>
-          <span className="header-highlight">AI Model Explorer:</span> {modelName}
+          <span className="header-highlight">Model Zoo:</span> {modelName}
         </h1>
       );
     }
@@ -60,15 +59,23 @@ const Header: React.FC<HeaderProps> = ({
       <div className="header-actions">
         {isAuthenticated ? (
           <div className="auth-controls">
-            <span className="user-greeting">{user?.name}</span>
+            <div className="user-info">
+              <span className="user-name">{user?.name}</span>
+            </div>
             <button onClick={handleLogout} className="logout-button">
               Logout
             </button>
           </div>
         ) : (
-          <div className="auth-buttons">
-            <Link to="/login" className="login-link">Sign In</Link>
-            <Link to="/register" className="register-button">Create Account</Link>
+          <div className="auth-controls">
+            <div className="user-info">
+              <span className="guest-status">Guest User</span>
+              <span className="container-type">• Shared Container</span>
+            </div>
+            <div className="auth-buttons">
+              <Link to="/login" className="login-link">Sign In</Link>
+              <Link to="/register" className="register-button">Create Account</Link>
+            </div>
           </div>
         )}
       </div>

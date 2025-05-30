@@ -36,34 +36,9 @@ import { LoginUseCase } from '../../features/auth/useCases/implementations/login
 import { IRegisterUseCase } from '../../features/auth/useCases/interfaces/register.usecase.interface';
 import { RegisterUseCase } from '../../features/auth/useCases/implementations/register.usecase';
 
-// Imports for Product Feature
-import { IProductRepository } from '../../features/products/repositories/product.repository.interface';
-import { ProductApiRepository } from '../../features/products/repositories/implementations/product-api.repository';
-import { IProductService } from '../../features/products/services/product.service.interface';
-import { ProductService } from '../../features/products/services/implementations/product.service';
-
-// Product use cases
-import {
-    IUseCase,
-    IUseCaseNoInput,
-    GetProductsUseCase,
-    GetProductByIdUseCase,
-    GetSelectedProductsUseCase,
-    CreateProductUseCase,
-    UpdateProductUseCase,
-    DeleteProductUseCase,
-    SelectProductUseCase,
-    UnselectProductUseCase,
-    GetSelectedProductIdsUseCase,
-    ClearSelectedProductsUseCase
-} from '../../features/products/useCases';
-
-// Product use case types for proper interface binding
-import { ProductDto, ProductFilterRequest, ProductListResponse } from '../../features/products/models/product.dto';
-
 // Imports for Model Feature
 import { IModelRepository } from '../../features/models/repositories/model.repository.interface';
-import { ModelApiRepository } from '../../features/models/repositories/implementations/model-api.repository';
+import { ModelHybridRepository } from '../../features/models/repositories/implementations/model-hybrid.repository';
 import { IModelService } from '../../features/models/services/model.service.interface';
 import { ModelService } from '../../features/models/services/implementations/model.service';
 
@@ -73,15 +48,19 @@ import {
     IGetModelByIdUseCase,
     ITestModelUseCase,
     IGetModelTestHistoryUseCase,
+    IGetModelStatusUseCase,
+    IStartModelUseCase,
+    IStopModelUseCase,
     GetModelsUseCase,
     GetModelByIdUseCase,
     TestModelUseCase,
-    GetModelTestHistoryUseCase
+    GetModelTestHistoryUseCase,
+    GetModelStatusUseCase,
+    StartModelUseCase,
+    StopModelUseCase
 } from '../../features/models/useCases';
 
 // Model types
-import { ModelDto, ModelFilterRequest, ModelListResponse, ModelTestRequest } from '../../features/models/models/model.dto';
-import { ModelInputData, ModelOutputData } from '../../types/model.types';
 
 const container = new Container();
 
@@ -91,23 +70,17 @@ container.bind<IStorageService>(TYPES.StorageService).to(LocalStorageAdapter).in
 container.bind<ILoggerService>(TYPES.LoggerService).to(ConsoleLoggerService).inSingletonScope();
 
 // Auth Feature
-// Using the real API repository for authentication
 container.bind<IAuthRepository>(TYPES.AuthRepository).to(AuthApiRepository).inSingletonScope();
-// container.bind<IAuthRepository>(TYPES.AuthRepository).to(AuthMockRepository).inSingletonScope();
 
 // Repositories
 container.bind<IUserRepository>(TYPES.UserRepository).to(UserApiRepository).inSingletonScope();
-// Using the real API repository for products
-container.bind<IProductRepository>(TYPES.ProductRepository).to(ProductApiRepository).inSingletonScope();
-// container.bind<IProductRepository>(TYPES.ProductRepository).to(ProductMockRepository).inSingletonScope();
 
 // Models Repository
-container.bind<IModelRepository>(TYPES.ModelRepository).to(ModelApiRepository).inSingletonScope();
+container.bind<IModelRepository>(TYPES.ModelRepository).to(ModelHybridRepository).inSingletonScope();
 
 // Services
 container.bind<IUserService>(TYPES.UserService).to(UserService).inSingletonScope();
 container.bind<IAuthService>(TYPES.AuthService).to(AuthService).inSingletonScope();
-container.bind<IProductService>(TYPES.ProductService).to(ProductService).inSingletonScope();
 container.bind<IModelService>(TYPES.ModelService).to(ModelService).inSingletonScope();
 
 // User and Auth Use Cases
@@ -115,22 +88,13 @@ container.bind<IGetUserProfileUseCase>(TYPES.GetUserProfileUseCase).to(GetUserPr
 container.bind<ILoginUseCase>(TYPES.LoginUseCase).to(LoginUseCase).inRequestScope();
 container.bind<IRegisterUseCase>(TYPES.RegisterUseCase).to(RegisterUseCase).inRequestScope();
 
-// Product Use Cases - Binding to interfaces first, then implementations
-container.bind<IUseCase<ProductFilterRequest, ProductListResponse>>(TYPES.GetProductsUseCase).to(GetProductsUseCase).inRequestScope();
-container.bind<IUseCase<string, ProductDto | null>>(TYPES.GetProductByIdUseCase).to(GetProductByIdUseCase).inRequestScope();
-container.bind<IUseCase<string[], ProductDto[]>>(TYPES.GetSelectedProductsUseCase).to(GetSelectedProductsUseCase).inRequestScope();
-container.bind<IUseCase<Omit<ProductDto, 'id'>, ProductDto>>(TYPES.CreateProductUseCase).to(CreateProductUseCase).inRequestScope();
-container.bind<IUseCase<{ id: string; data: Partial<ProductDto> }, ProductDto>>(TYPES.UpdateProductUseCase).to(UpdateProductUseCase).inRequestScope();
-container.bind<IUseCase<string, boolean>>(TYPES.DeleteProductUseCase).to(DeleteProductUseCase).inRequestScope();
-container.bind<IUseCase<string, void>>(TYPES.SelectProductUseCase).to(SelectProductUseCase).inRequestScope();
-container.bind<IUseCase<string, void>>(TYPES.UnselectProductUseCase).to(UnselectProductUseCase).inRequestScope();
-container.bind<IUseCaseNoInput<string[]>>(TYPES.GetSelectedProductIdsUseCase).to(GetSelectedProductIdsUseCase).inRequestScope();
-container.bind<IUseCaseNoInput<void>>(TYPES.ClearSelectedProductsUseCase).to(ClearSelectedProductsUseCase).inRequestScope();
-
 // Model Use Cases
 container.bind<IGetModelsUseCase>(TYPES.GetModelsUseCase).to(GetModelsUseCase).inRequestScope();
 container.bind<IGetModelByIdUseCase>(TYPES.GetModelByIdUseCase).to(GetModelByIdUseCase).inRequestScope();
 container.bind<ITestModelUseCase>(TYPES.TestModelUseCase).to(TestModelUseCase).inRequestScope();
 container.bind<IGetModelTestHistoryUseCase>(TYPES.GetModelTestHistoryUseCase).to(GetModelTestHistoryUseCase).inRequestScope();
+container.bind<IGetModelStatusUseCase>(TYPES.GetModelStatusUseCase).to(GetModelStatusUseCase).inRequestScope();
+container.bind<IStartModelUseCase>(TYPES.StartModelUseCase).to(StartModelUseCase).inRequestScope();
+container.bind<IStopModelUseCase>(TYPES.StopModelUseCase).to(StopModelUseCase).inRequestScope();
 
 export { container }; 

@@ -25,47 +25,38 @@ export class AxiosHttpClientAdapter implements IHttpClient {
       }
     });
 
-    // Add request interceptor to attach the token
     this.client.interceptors.request.use(
       (config) => {
         const token = this.storageService.get('token');
         if (token && config.headers) {
           config.headers.Authorization = `Bearer ${token}`;
         }
+        
         return config;
       },
       (error) => Promise.reject(error)
     );
 
-    // Add response interceptor for error handling
     this.client.interceptors.response.use(
       (response) => response,
       (error: AxiosError) => {
         if (error.response) {
-          // The request was made and the server responded with a status code
-          // that falls out of the range of 2xx
           this.logger.error('API Response Error:', {
             status: error.response.status,
             data: error.response.data,
             url: error.config?.url
           });
-
-          // Pass the error through with the response data
           return Promise.reject(error);
         } else if (error.request) {
-          // The request was made but no response was received
           this.logger.error('API Request Error (No Response):', {
             request: error.request,
             url: error.config?.url
           });
-          
-          // Create a more user-friendly error for connection issues
           const connectionError = new Error(
             'Cannot connect to the server. Please check your internet connection and try again.'
           );
           return Promise.reject(connectionError);
         } else {
-          // Something happened in setting up the request
           this.logger.error('API Error:', error.message);
         }
         return Promise.reject(error);
