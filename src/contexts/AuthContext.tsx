@@ -81,8 +81,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         roles: foundUser.roles
       };
       
-      // Generate a fake token
-      const token = `dummy-jwt-${Date.now()}-${Math.random().toString(36).substring(2, 15)}`;
+      // Generate a fake token with user ID embedded
+      const token = `dummy-jwt-${userData.id}-${Date.now()}-${Math.random().toString(36).substring(2, 15)}`;
       
       // Store in localStorage
       localStorage.setItem(TOKEN_KEY, token);
@@ -113,8 +113,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       roles: ['user']
     };
     
-    // Generate a fake token
-    const token = `dummy-jwt-${Date.now()}-${Math.random().toString(36).substring(2, 15)}`;
+    // Generate a fake token with user ID embedded
+    const token = `dummy-jwt-${newUser.id}-${Date.now()}-${Math.random().toString(36).substring(2, 15)}`;
     
     // Store in localStorage
     localStorage.setItem(TOKEN_KEY, token);

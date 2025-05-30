@@ -13,7 +13,7 @@ export class AxiosHttpClientAdapter implements IHttpClient {
     @inject(TYPES.StorageService) private readonly storageService: IStorageService,
     @inject(TYPES.LoggerService) private readonly logger: ILoggerService
   ) {
-    const baseURL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api';
+    const baseURL = import.meta.env.VITE_API_BASE_URL || '/api';
     
     this.logger.info(`Initializing HTTP client with base URL: ${baseURL}`);
     

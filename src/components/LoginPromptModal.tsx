@@ -84,6 +84,7 @@ const LoginPromptModal: React.FC<LoginPromptModalProps> = ({ isOpen, onClose, re
           <Link 
             to="/login" 
             className="login-button"
+            state={{ from: { pathname: window.location.pathname, search: window.location.search } }}
             ref={firstFocusableElementRef}
           >
             Sign In

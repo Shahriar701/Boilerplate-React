@@ -102,7 +102,7 @@ const App = () => {
                   <Route path="/models/:id" element={<ModelDetailPage />} />
                   
                   {/* Home page with redirect logic */}
-                  <Route path="/" element={<Navigate to="/models" replace />} />
+                  <Route path="/" element={<HomePage />} />
                   
                   {/* Catch-all route */}
                   <Route path="*" element={<Navigate to="/models" replace />} />
