@@ -1,4 +1,4 @@
-import { AuthResponseDTO, LoginDTO, RegisterDTO } from '../../models/auth.dto';
+import { AuthResponseDTO } from '../../models/auth.dto';
 
 export interface LoginCredentials {
   email: string;

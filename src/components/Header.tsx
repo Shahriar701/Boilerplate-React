@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import '../styles/header.css';
 
@@ -15,10 +15,11 @@ const Header: React.FC<HeaderProps> = ({
   const { user, isAuthenticated, logout } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   
   const handleLogout = async () => {
     await logout();
-    navigate('/login');
+    navigate('/models');
   };
   
   const toggleMenu = () => {
@@ -70,10 +71,15 @@ const Header: React.FC<HeaderProps> = ({
           <div className="auth-controls">
             <div className="user-info">
               <span className="guest-status">Guest User</span>
-              <span className="container-type">• Shared Container</span>
             </div>
             <div className="auth-buttons">
-              <Link to="/login" className="login-link">Sign In</Link>
+              <Link 
+                to="/login" 
+                state={{ from: location }}
+                className="login-link"
+              >
+                Sign In
+              </Link>
               <Link to="/register" className="register-button">Create Account</Link>
             </div>
           </div>

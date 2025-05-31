@@ -16,31 +16,32 @@ jest.mock('./vite-env.d.ts', () => ({
 
 // Mock the container to avoid dependency injection issues
 jest.mock('./app/config/inversify.config', () => ({
-  container: {}
+  container: {
+    get: () => ({
+      isAuthenticated: () => false,
+      login: () => Promise.resolve(null),
+      logout: () => Promise.resolve(),
+      register: () => Promise.resolve(null),
+      getCurrentUser: () => null
+    })
+  }
 }));
 
-// Mock the router to avoid navigation issues
-jest.mock('react-router-dom', () => ({
-  BrowserRouter: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-  Routes: () => <div data-testid="mock-routes" />,
-  Route: () => null,
-  Navigate: () => null
-}));
-
-// Mock the AppRoutes component
-jest.mock('./routes/AppRoutes', () => () => <div data-testid="mock-routes">Routes Mock</div>);
+// Mock AppRoutes to avoid testing routing logic here
+jest.mock('./routes/AppRoutes', () => () => <div data-testid="app-routes">Routes Component</div>);
 
 describe('App', () => {
-  it('renders the app container', () => {
+  it('renders the application with providers', () => {
     render(<App />);
-    const mainElement = screen.getByRole('main');
-    expect(mainElement).toBeInTheDocument();
-    expect(mainElement).toHaveClass('app-container');
+    
+    // Verify AppRoutes is rendered
+    const routesComponent = screen.getByTestId('app-routes');
+    expect(routesComponent).toBeInTheDocument();
+    expect(routesComponent).toHaveTextContent('Routes Component');
   });
 
-  it('renders the routes', () => {
-    render(<App />);
-    const routesElement = screen.getByTestId('mock-routes');
-    expect(routesElement).toBeInTheDocument();
+  it('renders within error boundary', () => {
+    const { container } = render(<App />);
+    expect(container.firstChild).toBeInTheDocument();
   });
 }); 

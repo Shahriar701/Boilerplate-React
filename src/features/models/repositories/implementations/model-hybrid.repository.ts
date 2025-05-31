@@ -223,15 +223,62 @@ export class ModelHybridRepository implements IModelRepository {
       console.warn('Response keys:', Object.keys(response || {}));
       throw new Error(`Unexpected response format from backend model. Response: ${JSON.stringify(response)}`);
       
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error calling real backend model:', error);
       
-      if (error instanceof Error && (error.message.includes('503') || error.message.includes('not running'))) {
+      // Extract the actual error message from different error structures
+      let errorMessage = '';
+      if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.response?.data) {
+        errorMessage = typeof error.response.data === 'string' ? error.response.data : JSON.stringify(error.response.data);
+      } else if (error.message) {
+        errorMessage = error.message;
+      } else {
+        errorMessage = String(error);
+      }
+      
+      console.log('Extracted error message:', errorMessage);
+      
+      // Handle service establishing errors specifically - check for exact message patterns
+      if (errorMessage.includes('service is starting up') || 
+          errorMessage.includes('establishing') ||
+          errorMessage.includes('GRPC_SERVICE_ESTABLISHING') ||
+          errorMessage.includes('REST_SERVICE_ESTABLISHING') ||
+          errorMessage.includes('gRPC service is starting up') ||
+          errorMessage.includes('REST service is starting up')) {
+        
+        console.log('Detected service establishing error');
+        throw new Error('The model service is starting up. Please try again in a few seconds.');
+      }
+      
+      // Handle PENDING status from enhanced invoke endpoint
+      if (errorMessage.includes('PENDING') && errorMessage.includes('try again in a few seconds')) {
+        console.log('Detected PENDING status from invoke endpoint');
+        throw new Error('The model is starting up. Please try again in a few seconds.');
+      }
+      
+      // Handle generic 503 errors (but not the establishing ones we caught above)
+      if (error.response?.status === 503 || errorMessage.includes('503')) {
+        console.log('Detected 503 service unavailable');
+        throw new Error('Model service is temporarily unavailable. Please try again in a moment.');
+      }
+      
+      // Handle explicit "not running" messages
+      if (errorMessage.includes('not running')) {
+        console.log('Detected model not running error');
         throw new Error('Model is not running. Please start the model first and try again.');
       }
       
+      // Handle connection errors
+      if (error.code === 'ECONNREFUSED' || errorMessage.includes('ECONNREFUSED')) {
+        console.log('Detected connection refused error');
+        throw new Error('Cannot connect to model service. The model may be starting up.');
+      }
+      
+      // For all other errors, pass through the actual error message
       if (error instanceof Error) {
-        throw new Error(`Backend API error: ${error.message}`);
+        throw new Error(`Backend API error: ${errorMessage}`);
       }
       
       throw error;

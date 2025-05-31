@@ -14,10 +14,6 @@ export interface UserDto {
   email: string;
   name: string;
   roles: string[];
-  isActive: boolean;
-  lastLogin: Date;
-  createdAt: Date;
-  updatedAt: Date;
 }
 
 export interface LoginResponse {

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
 import { useInjection } from 'inversify-react';
 import { TYPES } from '../../../app/config/types';
 import { useAuth } from '../../../contexts/AuthContext';
@@ -21,6 +21,7 @@ import { ModelInputData, ModelOutputData } from '../../../types/model.types';
 const ModelDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, isAuthenticated, getToken } = useAuth();
   
   // Dependency Injection
@@ -41,6 +42,7 @@ const ModelDetailPage: React.FC = () => {
   const [testError, setTestError] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [lastStatusUpdate, setLastStatusUpdate] = useState<Date>(new Date());
+  const [isServiceEstablishing, setIsServiceEstablishing] = useState(false);
 
   // Refs for preventing duplicate operations
   const isStartingRef = useRef(false);
@@ -48,6 +50,7 @@ const ModelDetailPage: React.FC = () => {
   const hasAttemptedAutoStartRef = useRef(false);
   const statusPollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const lastActivityRef = useRef<Date>(new Date());
+  const userManuallyStopped = useRef(false);
 
   useEffect(() => {
     if (id) {
@@ -56,37 +59,31 @@ const ModelDetailPage: React.FC = () => {
     }
   }, [id]);
 
-  // Auto-start model when page loads and model is not running
   useEffect(() => {
     const autoStartModel = async () => {
-      if ((modelStatus.status === 'STOPPED' || modelStatus.status === 'NOT_FOUND') && !hasAttemptedAutoStartRef.current) {
+      if ((modelStatus.status === 'STOPPED' || modelStatus.status === 'NOT_FOUND') && !hasAttemptedAutoStartRef.current && !userManuallyStopped.current) {
         console.log('Auto-starting model on page load...');
         hasAttemptedAutoStartRef.current = true;
         await handleStartModel();
       }
     };
 
-    // Reset auto-start flag when model becomes STOPPED (after being idle)
-    if (modelStatus.status === 'STOPPED' && hasAttemptedAutoStartRef.current) {
+    if (modelStatus.status === 'STOPPED' && hasAttemptedAutoStartRef.current && !userManuallyStopped.current) {
       console.log('Model stopped (likely due to inactivity), allowing auto-restart...');
       hasAttemptedAutoStartRef.current = false;
     }
 
-    // Only auto-start if we have model status and it's not already running/starting
-    if (modelStatus.status !== 'RUNNING' && modelStatus.status !== 'STARTING' && modelStatus.status !== 'PENDING' && model && !hasAttemptedAutoStartRef.current) {
+    if (modelStatus.status !== 'RUNNING' && modelStatus.status !== 'STARTING' && modelStatus.status !== 'PENDING' && model && !hasAttemptedAutoStartRef.current && !userManuallyStopped.current) {
       autoStartModel();
     }
   }, [modelStatus, model]);
 
-  // Smart status polling effect
   useEffect(() => {
     const startStatusPolling = () => {
-      // Clear any existing polling
       if (statusPollingIntervalRef.current) {
         clearInterval(statusPollingIntervalRef.current);
       }
 
-      // Determine polling interval based on model status
       const getPollingInterval = (status: string): number => {
         switch (status) {
           case 'STARTING':
@@ -170,18 +167,14 @@ const ModelDetailPage: React.FC = () => {
     };
   }, []);
 
-  // Pause polling when tab is not visible (browser optimization)
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.hidden) {
-        // Pause polling when tab is hidden
         if (statusPollingIntervalRef.current) {
           clearInterval(statusPollingIntervalRef.current);
         }
       } else {
-        // Resume polling when tab becomes visible
         if (id && !loading) {
-          // Immediately check status when tab becomes visible again
           fetchModelStatus();
         }
       }
@@ -230,12 +223,10 @@ const ModelDetailPage: React.FC = () => {
     try {
       console.log('Starting model...');
       isStartingRef.current = true;
+      userManuallyStopped.current = false;
       setModelStatus({ status: 'STARTING' });
       await startModelUseCase.execute(id!);
       console.log('Model start request completed');
-      
-      // The smart polling system will handle status updates automatically
-      // No need for manual polling here anymore
       
     } catch (err: any) {
       console.error('Error starting model:', err);
@@ -249,6 +240,8 @@ const ModelDetailPage: React.FC = () => {
 
   const handleStopModel = async () => {
     try {
+      console.log('User manually stopping model...');
+      userManuallyStopped.current = true; // Mark as manually stopped
       setModelStatus({ status: 'STOPPING' });
       await stopModelUseCase.execute(id!);
       await fetchModelStatus();
@@ -267,8 +260,8 @@ const ModelDetailPage: React.FC = () => {
       setTestLoading(true);
       setTestError(null);
       setTestResult(null);
+      setIsServiceEstablishing(false);
 
-      // Create input data in the correct format
       const inputData: ModelInputData = {
         imageUrl: '',
         file: selectedFile
@@ -281,8 +274,29 @@ const ModelDetailPage: React.FC = () => {
       });
       console.log('Model result received:', result);
       setTestResult(result);
+      setIsServiceEstablishing(false);
     } catch (err: any) {
       console.error('Error testing model:', err);
+      
+      if (err.message?.includes('service is starting up') || 
+          err.message?.includes('establishing') ||
+          err.message?.includes('GRPC_SERVICE_ESTABLISHING') ||
+          err.message?.includes('REST_SERVICE_ESTABLISHING')) {
+        
+        setIsServiceEstablishing(true);
+        setTestError('🔄 The model service is starting up. Please wait - retrying in 10 seconds...');
+        
+        setTimeout(() => {
+          if (!isTestingRef.current) {
+            console.log('Auto-retrying after service establishing error...');
+            handleTest();
+          }
+        }, 10000);
+        
+        return;
+      }
+      
+      setIsServiceEstablishing(false);
       
       if (err.message?.includes('auto-start')) {
         setModelStatus({ status: 'STARTING' });
@@ -299,6 +313,14 @@ const ModelDetailPage: React.FC = () => {
   const dismissError = () => {
     setError(null);
     setTestError(null);
+    setIsServiceEstablishing(false);
+  };
+
+  const retryTest = () => {
+    if (!isTestingRef.current && selectedFile) {
+      console.log('Manual retry triggered...');
+      handleTest();
+    }
   };
 
   const getStatusDisplay = () => {
@@ -431,7 +453,13 @@ const ModelDetailPage: React.FC = () => {
               <div className="auth-status">
                 <span className="guest-status">Guest User</span>
                 <span className="container-type">• Shared Container</span>
-                <Link to="/login" className="auth-link">Login</Link>
+                <Link 
+                  to="/login" 
+                  state={{ from: location }}
+                  className="auth-link"
+                >
+                  Login
+                </Link>
               </div>
             )}
           </div>
@@ -443,9 +471,16 @@ const ModelDetailPage: React.FC = () => {
         <div className="error-banner">
           <div className="error-content">
             <p>{error || testError}</p>
-            <button onClick={dismissError} className="dismiss-error-button">
-              ✕
-            </button>
+            <div className="error-actions">
+              {isServiceEstablishing && (
+                <button onClick={retryTest} className="retry-button">
+                  Retry Now
+                </button>
+              )}
+              <button onClick={dismissError} className="dismiss-error-button">
+                ✕
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -539,7 +574,9 @@ const ModelDetailPage: React.FC = () => {
               onClick={handleTest}
               disabled={!selectedFile || testLoading}
             >
-              {testLoading ? 'Processing...' : 'Process Image'}
+              {isServiceEstablishing ? '🔄 Establishing Connection...' : 
+               testLoading ? 'Processing...' : 
+               'Process Image'}
             </button>
           </div>
         </div>
