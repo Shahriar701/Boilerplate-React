@@ -14,14 +14,14 @@ export class ModelApiRepository implements IModelRepository {
 
   async getModels(filter?: ModelFilterRequest): Promise<ModelListResponse> {
     return await this.httpClient.get<ModelListResponse>(
-      '/api/models',
+      '/models',
       filter as Record<string, any>
     );
   }
 
   async getModelById(id: string): Promise<ModelDto | null> {
     try {
-      return await this.httpClient.get<ModelDto>(`/api/models/${id}`);
+      return await this.httpClient.get<ModelDto>(`/models/${id}`);
     } catch (error) {
       if ((error as any)?.response?.status === 404) {
         return null;
@@ -32,17 +32,17 @@ export class ModelApiRepository implements IModelRepository {
 
   async testModel(modelId: string, inputData: ModelInputData): Promise<ModelOutputData> {
     return await this.httpClient.post<ModelOutputData>(
-      `/api/models/${modelId}/test`,
+      `/models/${modelId}/test`,
       { inputData }
     );
   }
 
   async getModelTestHistory(modelId: string): Promise<any[]> {
-    return await this.httpClient.get<any[]>(`/api/models/${modelId}/history`);
+    return await this.httpClient.get<any[]>(`/models/${modelId}/history`);
   }
 
   async getModelStatus(modelId: string): Promise<ModelStatusResponse> {
-    const response = await this.httpClient.get<ModelStatusResponse>(`/api/models/${modelId}/status`);
+    const response = await this.httpClient.get<ModelStatusResponse>(`/models/${modelId}/status`);
     // Extract the status field if the response has the backend ModelStatus structure
     if (typeof response === 'object' && 'status' in response) {
       return {
@@ -57,10 +57,10 @@ export class ModelApiRepository implements IModelRepository {
   }
 
   async startModel(modelId: string): Promise<void> {
-    await this.httpClient.post<void>(`/api/models/${modelId}/start`);
+    await this.httpClient.post<void>(`/models/${modelId}/start`);
   }
 
   async stopModel(modelId: string): Promise<void> {
-    await this.httpClient.post<void>(`/api/models/${modelId}/stop`);
+    await this.httpClient.post<void>(`/models/${modelId}/stop`);
   }
 } 
