@@ -1,7 +1,3 @@
-# React Frontend Boilerplate with Clean Architecture
-
-A comprehensive guide to a modern, robust TypeScript React frontend built with SOLID principles, Clean Architecture, Dependency Injection, and a Use Case-driven approach.
-
 ## Table of Contents
 
 1. [Overview](#overview)
@@ -932,124 +928,302 @@ npm run build
 - Implement model result history
 - Add real-time notifications for test results
 
-## API Endpoints for ML Model Testing Platform
+## API Endpoints
 
-Below is a comprehensive list of API endpoints needed to implement to make this application fully dynamic instead of using mock data:
+The following endpoints are required by the frontend application:
 
-### Authentication APIs
+### Authentication Endpoints
 
-1. **POST /api/auth/register**
-   - Purpose: Register a new user
-   - Request Body: `{ email, password, name }`
-   - Response: `{ user: { id, email, name }, token }`
+#### 1. User Registration
+- **Endpoint**: `POST /api/auth/register`
+- **Payload**:
+```typescript
+{
+  name: string;
+  email: string;
+  password: string;
+}
+```
+- **Response**:
+```typescript
+{
+  success: boolean;
+  user: {
+    id: string;
+    name: string;
+    email: string;
+  } | null;
+  token?: string;
+  message?: string;
+}
+```
 
-2. **POST /api/auth/login**
-   - Purpose: Authenticate a user
-   - Request Body: `{ email, password }`
-   - Response: `{ user: { id, email, name }, token }`
+#### 2. User Login
+- **Endpoint**: `POST /api/auth/login`
+- **Payload**:
+```typescript
+{
+  email: string;
+  password: string;
+}
+```
+- **Response**:
+```typescript
+{
+  success: boolean;
+  user: {
+    id: string;
+    name: string;
+    email: string;
+  } | null;
+  token?: string;
+  message?: string;
+}
+```
 
-3. **GET /api/auth/me**
-   - Purpose: Get current user information
-   - Headers: `Authorization: Bearer {token}`
-   - Response: `{ id, email, name, role }`
+#### 3. User Profile
+- **Endpoint**: `GET /api/auth/profile`
+- **Headers**: `Authorization: Bearer {token}`
+- **Response**:
+```typescript
+{
+  id: string;
+  name: string;
+  email: string;
+  createdAt: string;
+}
+```
 
-4. **POST /api/auth/logout**
-   - Purpose: Invalidate current session
-   - Headers: `Authorization: Bearer {token}`
-   - Response: `{ success: true }`
+### Models Endpoints
 
-### Models APIs
+#### 4. Get All Models
+- **Endpoint**: `GET /api/models`
+- **Query Parameters**: 
+  - `page?: number`
+  - `limit?: number`
+  - `search?: string` 
+  - `sortBy?: string`
+  - `sortDirection?: 'asc' | 'desc'`
+- **Response**:
+```typescript
+{
+  models: [
+    {
+      id: string;
+      name: string;
+      description: string;
+      accuracy: number;
+      lastTested: string;
+      imageUrl: string;
+      inputType: 'text' | 'image' | 'audio' | 'json';
+      outputType: 'text' | 'image' | 'audio' | 'json';
+    }
+  ];
+  totalCount: number;
+  page: number;
+  totalPages: number;
+}
+```
 
-1. **GET /api/models**
-   - Purpose: List all available models
-   - Query Parameters: `page`, `limit`, `sort`, `filter`
-   - Response: `{ models: [{ id, name, description, accuracy, lastTested, imageUrl, inputType, outputType }], pagination: { total, page, limit } }`
+#### 5. Get Model by ID
+- **Endpoint**: `GET /api/models/{id}`
+- **Response**:
+```typescript
+{
+  id: string;
+  name: string;
+  description: string;
+  accuracy: number;
+  lastTested: string;
+  imageUrl: string;
+  inputType: 'text' | 'image' | 'audio' | 'json';
+  outputType: 'text' | 'image' | 'audio' | 'json';
+  details: {
+    framework: string;
+    version: string;
+    size: string;
+    type: string;
+    created: string;
+    author: string;
+  }
+}
+```
 
-2. **GET /api/models/:id**
-   - Purpose: Get detailed model information
-   - Response: `{ id, name, description, accuracy, lastTested, imageUrl, inputType, outputType, details: { framework, version, size, type, created, author } }`
+#### 6. Test Model
+- **Endpoint**: `POST /api/models/{id}/test`
+- **Headers**: `Authorization: Bearer {token}`
+- **Payload** (varies based on inputType):
+  
+  For text input:
+  ```typescript
+  {
+    text: string;
+  }
+  ```
+  
+  For image input:
+  ```typescript
+  {
+    imageUrl: string; // Base64 or URL
+  }
+  ```
+  
+  For audio input:
+  ```typescript
+  {
+    audioUrl: string; // Base64 or URL
+  }
+  ```
+  
+  For JSON input:
+  ```typescript
+  {
+    data: any; // JSON object
+  }
+  ```
 
-3. **POST /api/models/:id/test**
-   - Purpose: Run a model with input data
-   - Headers: `Authorization: Bearer {token}`
-   - Request Body: Varies based on model's inputType:
-     - Image: `{ imageUrl: string }` or `{ imageData: base64 }`
-     - Text: `{ text: string }`
-     - Audio: `{ audioUrl: string }` or `{ audioData: base64 }`
-     - JSON: `{ data: object }`
-   - Response: Varies based on model's outputType:
-     - Image: `{ imageUrl: string, annotations: [{ id, label, confidence, x, y, width, height }] }`
-     - Text: `{ text: string }`
-     - Audio: `{ audioUrl: string, transcript: string }`
-     - JSON: `{ analysis: object }`
+- **Response** (varies based on outputType):
+  
+  For text output:
+  ```typescript
+  {
+    text: string;
+  }
+  ```
+  
+  For image output:
+  ```typescript
+  {
+    imageUrl: string;
+    annotations?: Array<{
+      id: number;
+      label: string;
+      confidence: number;
+      x?: number;
+      y?: number;
+      width?: number;
+      height?: number;
+    }>
+  }
+  ```
+  
+  For audio output:
+  ```typescript
+  {
+    audioUrl: string;
+    transcript?: string;
+  }
+  ```
+  
+  For JSON output:
+  ```typescript
+  {
+    analysis: any; // JSON object with results
+  }
+  ```
 
-4. **GET /api/models/:id/history**
-   - Purpose: Get history of tests for a specific model
-   - Headers: `Authorization: Bearer {token}`
-   - Response: `{ tests: [{ id, timestamp, input, output, accuracy, userId }] }`
+#### 7. Get Model Test History
+- **Endpoint**: `GET /api/models/{id}/tests`
+- **Headers**: `Authorization: Bearer {token}`
+- **Query Parameters**: 
+  - `page?: number`
+  - `limit?: number`
+- **Response**:
+```typescript
+{
+  tests: [
+    {
+      id: string;
+      modelId: string;
+      timestamp: string;
+      input: {
+        type: 'text' | 'image' | 'audio' | 'json';
+        data: any; // Depends on input type
+      };
+      output: {
+        type: 'text' | 'image' | 'audio' | 'json';
+        data: any; // Depends on output type
+      };
+      executionTimeMs: number;
+    }
+  ];
+  totalCount: number;
+  page: number;
+  totalPages: number;
+}
+```
 
-### Admin APIs (for managing models)
+### Additional Endpoints
 
-1. **POST /api/admin/models**
-   - Purpose: Create a new model
-   - Headers: `Authorization: Bearer {token}`
-   - Request Body: `{ name, description, imageUrl, inputType, outputType, details }`
-   - Response: `{ id, name, description, ... }`
+#### 8. User's Model Test History (across all models)
+- **Endpoint**: `GET /api/user/tests`
+- **Headers**: `Authorization: Bearer {token}`
+- **Query Parameters**: 
+  - `page?: number`
+  - `limit?: number`
+  - `modelId?: string` (optional filter by model)
+- **Response**: Same as the model test history response
 
-2. **PUT /api/admin/models/:id**
-   - Purpose: Update model details
-   - Headers: `Authorization: Bearer {token}`
-   - Request Body: `{ name, description, imageUrl, inputType, outputType, details }`
-   - Response: `{ id, name, description, ... }`
+#### 9. Update User Profile
+- **Endpoint**: `PUT /api/auth/profile`
+- **Headers**: `Authorization: Bearer {token}`
+- **Payload**:
+```typescript
+{
+  name?: string;
+  email?: string;
+  password?: string; // If changing password
+  currentPassword?: string; // Required for password change
+}
+```
+- **Response**:
+```typescript
+{
+  success: boolean;
+  user: {
+    id: string;
+    name: string;
+    email: string;
+  } | null;
+  message?: string;
+}
+```
 
-3. **DELETE /api/admin/models/:id**
-   - Purpose: Remove a model
-   - Headers: `Authorization: Bearer {token}`
-   - Response: `{ success: true }`
+#### 10. Refresh Authentication Token
+- **Endpoint**: `POST /api/auth/refresh-token`
+- **Payload**:
+```typescript
+{
+  refreshToken: string;
+}
+```
+- **Response**:
+```typescript
+{
+  success: boolean;
+  token?: string;
+  refreshToken?: string;
+  message?: string;
+}
+```
 
-### User Management APIs
+### Standard API Response Structure
 
-1. **GET /api/users/profile**
-   - Purpose: Get user profile
-   - Headers: `Authorization: Bearer {token}`
-   - Response: `{ id, name, email, testCount, favoriteModels }`
+For consistency, the backend implements a standard response format:
 
-2. **PUT /api/users/profile**
-   - Purpose: Update user profile
-   - Headers: `Authorization: Bearer {token}`
-   - Request Body: `{ name, email, password }`
-   - Response: `{ id, name, email }`
-
-3. **GET /api/users/tests**
-   - Purpose: Get tests history for current user
-   - Headers: `Authorization: Bearer {token}`
-   - Response: `{ tests: [{ id, modelId, modelName, timestamp, inputType, outputType }] }`
-
-### Implementation Strategy
-
-1. **Backend Technology Stack Options**:
-   - Node.js with Express
-   - Python with FastAPI or Flask
-   - Java with Spring Boot
-   - .NET Core
-   
-2. **Authentication Implementation**:
-   - JWT (JSON Web Tokens) for stateless authentication
-   - Refresh token strategy for longer sessions
-   - Role-based permissions system
-
-3. **Database Options**:
-   - PostgreSQL or MySQL for relational data
-   - MongoDB for more flexible document storage
-   - Firebase for rapid development
-
-4. **File Storage for Images/Audio**:
-   - AWS S3 or Google Cloud Storage
-   - Azure Blob Storage
-   - Local file system (for development)
-
-5. **Machine Learning Model Integration**:
-   - Direct integration with TensorFlow/PyTorch models
-   - API connection to model serving systems like TensorFlow Serving
-   - Integration with cloud ML platforms (AWS SageMaker, Google AI Platform)
-   - Docker containers for model isolation and scalability
+```typescript
+{
+  success: boolean;
+  data?: any; // The actual response data
+  error?: {
+    code: string;
+    message: string;
+    details?: any;
+  };
+  meta?: {
+    page?: number;
+    totalPages?: number;
+    totalCount?: number;
+  };
+}
+```
