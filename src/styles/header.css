@@ -62,7 +62,38 @@
 .auth-controls {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 16px;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.user-name {
+  color: #10b981;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.guest-status {
+  color: #f59e0b;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.container-type {
+  color: #9ca3af;
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.auth-buttons {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .user-greeting {
@@ -84,12 +115,6 @@
 .logout-button:hover {
   background-color: var(--color-primary);
   color: var(--color-button-primary-text);
-}
-
-.auth-buttons {
-  display: flex;
-  gap: 1rem;
-  align-items: center;
 }
 
 .login-link {

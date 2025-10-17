@@ -1,8 +1,5 @@
 import { InputType, OutputType } from '../../../types/model.types';
 
-/**
- * Model data transfer object for communication between layers
- */
 export interface ModelDto {
   id: string;
   name: string;
@@ -22,9 +19,7 @@ export interface ModelDto {
   };
 }
 
-/**
- * Request interface for filtering models
- */
+
 export interface ModelFilterRequest {
   inputType?: InputType;
   outputType?: OutputType;
@@ -33,9 +28,6 @@ export interface ModelFilterRequest {
   limit?: number;
 }
 
-/**
- * Response interface for model listings
- */
 export interface ModelListResponse {
   models: ModelDto[];
   total: number;
@@ -43,17 +35,11 @@ export interface ModelListResponse {
   limit: number;
 }
 
-/**
- * Model test request containing input data
- */
 export interface ModelTestRequest {
   modelId: string;
   inputData: any;
 }
 
-/**
- * Model test response with output data
- */
 export interface ModelTestResponse {
   outputData: any;
   processingTime?: number;

@@ -1,7 +1,13 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import Header from '../components/Header';
+
+interface LocationState {
+  from?: {
+    pathname: string;
+  };
+}
 
 const RegisterPage: React.FC = () => {
   const [name, setName] = useState('');
@@ -13,6 +19,11 @@ const RegisterPage: React.FC = () => {
   
   const { register } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  
+  // Get the page they were trying to access
+  const state = location.state as LocationState;
+  const from = state?.from?.pathname || '/models';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,7 +44,7 @@ const RegisterPage: React.FC = () => {
     try {
       const success = await register(name, email, password);
       if (success) {
-        navigate('/models');
+        navigate(from, { replace: true });
       } else {
         setError('Registration failed. This email may already be in use.');
       }
@@ -125,8 +136,23 @@ const RegisterPage: React.FC = () => {
           
           <div className="auth-links">
             <p>
-              Already have an account? <Link to="/login">Sign In</Link>
+              Already have an account? <Link 
+                to="/login"
+                state={{ from: state?.from || location }}
+              >
+                Sign In
+              </Link>
             </p>
+            <div className="guest-access">
+              <hr className="divider" />
+              <p className="guest-text">Just want to explore?</p>
+              <Link to="/models" className="guest-button">
+                Browse Models as Guest
+              </Link>
+              <p className="guest-note">
+                Browse and view models without an account. Sign up to test models with your own data.
+              </p>
+            </div>
           </div>
         </div>
       </div>

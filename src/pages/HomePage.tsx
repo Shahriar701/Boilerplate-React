@@ -5,7 +5,6 @@ const HomePage: React.FC = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Always redirect to models page
     navigate('/models');
   }, [navigate]);
 

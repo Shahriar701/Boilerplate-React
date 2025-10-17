@@ -15,7 +15,7 @@ const LoginPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-  const { login } = useAuth();
+  const { login, setGuestMode } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   
@@ -40,6 +40,12 @@ const LoginPage: React.FC = () => {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleGuestAccess = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setGuestMode(true);
+    navigate('/models', { replace: true });
   };
 
   return (
@@ -101,6 +107,16 @@ const LoginPage: React.FC = () => {
             <p>
               Don't have an account? <Link to="/register">Create an account</Link>
             </p>
+            <div className="guest-access">
+              <hr className="divider" />
+              <p className="guest-text">Just want to explore?</p>
+              <button onClick={handleGuestAccess} className="guest-button">
+                Browse Models as Guest
+              </button>
+              <p className="guest-note">
+                Browse and view models without an account. Sign in to test models with your own data.
+              </p>
+            </div>
           </div>
         </div>
       </div>

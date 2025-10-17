@@ -20,7 +20,6 @@ const LoginPromptModal: React.FC<LoginPromptModalProps> = ({ isOpen, onClose, re
     }
   };
 
-  // Handle ESC key to close modal
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {

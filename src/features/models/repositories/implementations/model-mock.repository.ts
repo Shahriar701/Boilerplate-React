@@ -2,117 +2,64 @@ import { injectable } from 'inversify';
 import { IModelRepository } from '../model.repository.interface';
 import { ModelDto, ModelFilterRequest, ModelListResponse } from '../../models/model.dto';
 import { ModelInputData, ModelOutputData } from '../../../../types/model.types';
+import { ModelStatusResponse } from '../../useCases/interfaces/get-model-status.usecase.interface';
 
 @injectable()
 export class ModelMockRepository implements IModelRepository {
-  // Dummy data for development
+  // Mock data matching the actual backend models
   private dummyModels: ModelDto[] = [
     {
-      id: '1',
-      name: 'Object Recognition v1',
-      description: 'Detects and identifies common objects in images with high accuracy.',
-      accuracy: 92.5,
-      lastTested: '2023-06-15',
-      imageUrl: 'https://via.placeholder.com/300x200?text=Object+Recognition',
-      inputType: 'image',
-      outputType: 'image',
-      details: {
-        framework: 'TensorFlow',
-        version: '2.0.1',
-        size: '125MB',
-        type: 'Convolutional Neural Network',
-        created: '2023-01-20',
-        author: 'AI Research Team'
-      }
-    },
-    {
-      id: '2',
-      name: 'Sentiment Analysis',
-      description: 'Analyzes text to determine sentiment (positive, negative, neutral).',
-      accuracy: 88.7,
-      lastTested: '2023-07-22',
-      imageUrl: 'https://via.placeholder.com/300x200?text=Sentiment+Analysis',
-      inputType: 'text',
-      outputType: 'text',
-      details: {
-        framework: 'PyTorch',
-        version: '1.8.0',
-        size: '86MB',
-        type: 'BERT-based Transformer',
-        created: '2023-03-15',
-        author: 'NLP Division'
-      }
-    },
-    {
-      id: '3',
-      name: 'Face Detection',
-      description: 'Identifies faces in images and videos with bounding boxes.',
-      accuracy: 95.3,
-      lastTested: '2023-05-30',
-      imageUrl: 'https://via.placeholder.com/300x200?text=Face+Detection',
-      inputType: 'image',
-      outputType: 'image',
-      details: {
-        framework: 'OpenCV & TensorFlow',
-        version: '1.2.0',
-        size: '98MB',
-        type: 'Cascade Classifier with CNN',
-        created: '2023-02-10',
-        author: 'Computer Vision Team'
-      }
-    },
-    {
-      id: '4',
-      name: 'Speech Recognition',
-      description: 'Converts spoken language into text with support for multiple languages.',
-      accuracy: 90.1,
-      lastTested: '2023-08-05',
-      imageUrl: 'https://via.placeholder.com/300x200?text=Speech+Recognition',
-      inputType: 'audio',
-      outputType: 'text',
-      details: {
-        framework: 'Keras & TensorFlow',
-        version: '3.1.2',
-        size: '215MB',
-        type: 'Recurrent Neural Network',
-        created: '2023-05-03',
-        author: 'Audio Processing Division'
-      }
-    },
-    {
-      id: '5',
-      name: 'Image Segmentation',
-      description: 'Segments images into multiple parts to understand the content on a pixel level.',
-      accuracy: 89.4,
-      lastTested: '2023-07-19',
-      imageUrl: 'https://via.placeholder.com/300x200?text=Image+Segmentation',
+      id: 'depth-anything-v2',
+      name: 'Depth Anything V2',
+      description: 'A depth estimation model based on 2D images.',
+      accuracy: 94.2,
+      lastTested: '2023-12-15',
+      imageUrl: 'https://via.placeholder.com/300x200?text=Depth+Estimation',
       inputType: 'image',
       outputType: 'image',
       details: {
         framework: 'PyTorch',
-        version: '2.1.0',
-        size: '167MB',
-        type: 'U-Net Architecture',
-        created: '2023-04-28',
-        author: 'Computer Vision Team'
-      }
-    },
-    {
-      id: '6',
-      name: 'Pose Estimation',
-      description: 'Detects human figures in images and estimates their pose.',
-      accuracy: 87.8,
-      lastTested: '2023-08-12',
-      imageUrl: 'https://via.placeholder.com/300x200?text=Pose+Estimation',
-      inputType: 'image',
-      outputType: 'image',
-      details: {
-        framework: 'TensorFlow & MediaPipe',
-        version: '1.0.5',
+        version: '1.0.0',
         size: '145MB',
-        type: 'BlazePose CNN',
-        created: '2023-06-22',
-        author: 'Human Dynamics Group'
+        type: 'Computer Vision',
+        created: '2023-11-20',
+        author: 'Neuraverse Team'
+      }
+    },
+    {
+      id: 'depth-anything-v2-grpc',
+      name: 'Depth Anything V2 (gRPC)',
+      description: 'A depth estimation model based on 2D images with gRPC interface.',
+      accuracy: 94.2,
+      lastTested: '2023-12-15',
+      imageUrl: 'https://via.placeholder.com/300x200?text=Depth+gRPC',
+      inputType: 'image',
+      outputType: 'image',
+      details: {
+        framework: 'PyTorch',
+        version: '1.0.0',
+        size: '145MB',
+        type: 'Computer Vision (gRPC)',
+        created: '2023-11-20',
+        author: 'Neuraverse Team'
+      }
+    },
+    {
+      id: 'yolo-v11',
+      name: 'YOLO Object Detection V11',
+      description: 'A object detection model based on 2D images.',
+      accuracy: 92.8,
+      lastTested: '2023-12-14',
+      imageUrl: 'https://via.placeholder.com/300x200?text=Object+Detection',
+      inputType: 'image',
+      outputType: 'image',
+      details: {
+        framework: 'PyTorch',
+        version: '1.0.0',
+        size: '120MB',
+        type: 'Object Detection',
+        created: '2023-11-18',
+        author: 'Neuraverse Team'
       }
     }
   ];
@@ -176,49 +123,53 @@ export class ModelMockRepository implements IModelRepository {
       throw new Error('Model not found');
     }
     
-    // Generate appropriate mock response based on model output type
-    switch (model.outputType) {
-      case 'image':
-        if ('imageUrl' in inputData) {
-          return {
-            imageUrl: inputData.imageUrl,
-            annotations: [
-              { id: 1, label: 'Person', confidence: 0.97, x: 120, y: 80, width: 200, height: 180 },
-              { id: 2, label: 'Car', confidence: 0.88, x: 340, y: 200, width: 100, height: 150 },
-              { id: 3, label: 'Tree', confidence: 0.76, x: 20, y: 20, width: 100, height: 150 }
-            ]
-          };
-        } else {
-          throw new Error('Invalid input data for image model');
-        }
-      
-      case 'text':
-        if ('text' in inputData) {
-          return {
-            text: `Sentiment Analysis Results for: "${inputData.text}"\n\nSentiment: POSITIVE\nConfidence: 89%\n\nHighlighted positive phrases:\n- "really enjoyed"\n- "great experience"\n- "highly recommend"\n\nSuggested actions:\n- Share positive feedback with product team\n- Consider using testimonial in marketing`
-          };
-        } else {
-          throw new Error('Invalid input data for text model');
-        }
-      
-      case 'audio':
+    // All our models are image-to-image models (depth estimation or object detection)
+    if (model.outputType === 'image' && 'file' in inputData && inputData.file) {
+      // For depth estimation models, return a simulated depth map
+      if (model.id.includes('depth')) {
         return {
-          audioUrl: 'mock-audio-url',
-          transcript: "Transcript of the audio:\n\nWelcome to the demonstration of our speech recognition model. This technology can accurately convert spoken language to text in real-time, supporting multiple languages and dialects. The system has been trained on thousands of hours of diverse audio data to ensure high accuracy across different speakers and acoustic environments."
-        };
-        
-      case 'json':
-        return {
-          analysis: {
-            sentiment: 'positive',
-            confidence: 0.87,
-            entities: ['product', 'service', 'customer']
+          imageUrl: 'https://via.placeholder.com/512x384/000080/FFFFFF?text=Depth+Map+Output',
+          processingTime: delay / 1000,
+          metadata: {
+            modelId: model.id,
+            inputFormat: 'image',
+            outputFormat: 'depth_map',
+            resolution: '512x384'
           }
         };
-        
-      default:
-        return { text: "Model processed the request successfully." };
+      }
+      
+      // For object detection models, return annotated image
+      if (model.id.includes('yolo')) {
+        return {
+          imageUrl: 'https://via.placeholder.com/512x384/008000/FFFFFF?text=Objects+Detected',
+          annotations: [
+            { id: 1, label: 'Person', confidence: 0.97, x: 120, y: 80, width: 200, height: 180 },
+            { id: 2, label: 'Car', confidence: 0.88, x: 340, y: 200, width: 100, height: 150 }
+          ],
+          processingTime: delay / 1000,
+          metadata: {
+            modelId: model.id,
+            inputFormat: 'image',
+            outputFormat: 'annotated_image',
+            objectsDetected: 2
+          }
+        };
+      }
+      
+      // Fallback for other image models
+      return {
+        imageUrl: 'https://via.placeholder.com/512x384/800080/FFFFFF?text=Processed+Image',
+        processingTime: delay / 1000,
+        metadata: {
+          modelId: model.id,
+          inputFormat: 'image',
+          outputFormat: 'processed_image'
+        }
+      };
     }
+    
+    throw new Error('Invalid input data for this model');
   }
 
   async getModelTestHistory(modelId: string): Promise<any[]> {
@@ -254,5 +205,34 @@ export class ModelMockRepository implements IModelRepository {
   // Helper method to simulate network delay
   private delay(ms: number): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  async getModelStatus(modelId: string): Promise<ModelStatusResponse> {
+    // Simulate network delay
+    await this.delay(500);
+    
+    // Return a mock status - always running for simplicity
+    return {
+      status: 'RUNNING',
+      instanceName: `instance-${modelId}`,
+      lastInvocation: new Date(),
+      created: new Date()
+    };
+  }
+
+  async startModel(modelId: string): Promise<void> {
+    // Simulate network delay
+    await this.delay(1000);
+    
+    // Mock implementation - just log
+    console.log(`Mock: Starting model ${modelId}`);
+  }
+
+  async stopModel(modelId: string): Promise<void> {
+    // Simulate network delay
+    await this.delay(800);
+    
+    // Mock implementation - just log
+    console.log(`Mock: Stopping model ${modelId}`);
   }
 } 
